@@ -263,7 +263,7 @@ void CAN::recevoirMsg(QStandardItemModel *model)
         QStandardItem *item = new QStandardItem(line);
         model->appendRow(item);
 
-        // Option : limite le nombre de lignes pour éviter de saturer la RAM
+        //limite le nombre de lignes pour éviter de saturer la RAM
         const int maxRows = 2000;
         if (model->rowCount() > maxRows) {
             model->removeRow(0);
