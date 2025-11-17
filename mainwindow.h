@@ -7,6 +7,8 @@
 #include <QMainWindow>
 #include <QDebug>
 #include<QMessageBox>
+#include <QStandardItemModel>
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -27,15 +29,23 @@ public:
 private slots:
     void initialiserComboCartes();
 
+    void initialiserComboTrames();
+
+    void recevoir();
 
     void on_connection_clicked();
 
     void on_refresh_clicked();
 
+    void on_EnvoyerTrames_clicked();
+
+
 private:
     Ui::MainWindow *ui;
     Mux *mux;
     CAN *can;
+    QStandardItemModel *modelCan;
+    QTimer *timermsg;
 
 
 };

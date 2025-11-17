@@ -64,33 +64,209 @@ tMuxStatus CAN::configurerBus(){
 
 }
 
-void CAN::envoieMsgPeriodique(){
+// --- envoie de messages ---
+tMuxStatus CAN::envoieMsgPeriodique(unsigned long ident){
     // --- Configuration de la periode ---
     tCanPeriodicMsg hCanPeriodic{};
     hCanPeriodic.wOffset = 0;
-    hCanPeriodic.wParam = 1;
+    hCanPeriodic.wParam = 1;   // à terme -> CAN_PERIODIC_PARAM_ENABLE
 
-    //  -- Configuration du format des msg ---
-    tCanMsg msgCan{};
-    msgCan.wHandleMsg = 0;
-    msgCan.dwIdent = 0x100;
-    msgCan.eTypeId = CAN_ID_STD;
-    msgCan.dwMask = 0x000;
-    msgCan.eService = CAN_SVC_TRANSMIT_DATA;
-    msgCan.lPeriod = 100;// Période d’envoi en ms
-    msgCan.dwReserved1 = 0x000;
-    msgCan.dwReserved2 = 0x000;
-    msgCan.wDataLen = 8;
-    msgCan.bData[0] = 0x11;
-    msgCan.bData[1] = 0x22;
-    msgCan.bData[2] = 0x33;
-    msgCan.bData[3] = 0x44;
-    msgCan.bData[4] = 0x55;
-    msgCan.bData[5] = 0x66;
-    msgCan.bData[6] = 0x77;
-    msgCan.bData[7] = 0x88;
+    // --- Base commune ---
+    tCanMsg msg{};
+    msg.wHandleMsg  = 0;
+    msg.dwIdent     = ident;
+    msg.eTypeId     = CAN_ID_STD;
+    msg.dwMask      = 0x000;
+    msg.eService    = CAN_SVC_TRANSMIT_DATA;
+    msg.lPeriod     = 100;  //Période à 100ms
+    msg.dwReserved1 = 0;
+    msg.dwReserved2 = 0;
+    msg.wDataLen    = 8;
+
+    // Données selon l’ID (d’après ton envoieMsgPeriodique)
+    switch (ident) {
+    case 0x0F6:
+        msg.bData[0] = 0xC8;
+        msg.bData[1] = 0x00;
+        msg.bData[2] = 0x00;
+        msg.bData[3] = 0x00;
+        msg.bData[4] = 0x00;
+        msg.bData[5] = 0x00;
+        msg.bData[6] = 0x00;
+        msg.bData[7] = 0x00;
+        break;
+
+    case 0x036:
+        msg.bData[0] = 0x00;
+        msg.bData[1] = 0x00;
+        msg.bData[2] = 0x00;
+        msg.bData[3] = 0x3D;
+        msg.bData[4] = 0x01;
+        msg.bData[5] = 0x00;
+        msg.bData[6] = 0x00;
+        msg.bData[7] = 0x00;
+        break;
+
+    case 0x168:
+        msg.bData[0] = 0x00;
+        msg.bData[1] = 0x00;
+        msg.bData[2] = 0x00;
+        msg.bData[3] = 0x00;
+        msg.bData[4] = 0x00;
+        msg.bData[5] = 0x00;
+        msg.bData[6] = 0x00;
+        msg.bData[7] = 0x00;
+        break;
+
+    case 0x128:
+        msg.bData[0] = 0x00;
+        msg.bData[1] = 0x00;
+        msg.bData[2] = 0x00;
+        msg.bData[3] = 0x00;
+        msg.bData[4] = 0x00;
+        msg.bData[5] = 0x80;
+        msg.bData[6] = 0x00;
+        msg.bData[7] = 0x00;
+        break;
+    case 0x0B6:
+        msg.bData[0] = 0x00;
+        msg.bData[1] = 0x00;
+        msg.bData[2] = 0x00;
+        msg.bData[3] = 0x00;
+        msg.bData[4] = 0x00;
+        msg.bData[5] = 0x00;
+        msg.bData[6] = 0x00;
+        msg.bData[7] = 0x00;
+        break;
+    case 0x161:
+        msg.bData[0] = 0x00;
+        msg.bData[1] = 0x00;
+        msg.bData[2] = 0x00;
+        msg.bData[3] = 0x00;
+        msg.bData[4] = 0x00;
+        msg.bData[5] = 0x00;
+        msg.bData[6] = 0x00;
+        msg.bData[7] = 0x00;
+        break;
+    default:
+        QMessageBox::warning(nullptr, "Erreur CAN",QString("ID 0x%1 non géré.").arg(ident, 0, 16).toUpper());
+        return STATUS_ERR_PARAM;
+    }
+
+    // --- envoie trames ---
+    tMuxStatus status = CanSendMsg(mux->wCard,mux->hMuxConfigMode.wBusInterface,&msg);
+
+    if (status != STATUS_OK) {
+        QMessageBox::critical(
+            nullptr,
+            "Erreur CAN",
+            QString("Échec CanSendMsg (ID 0x%1, code %2)").arg(ident, 0, 16).toUpper().arg(status)
+        );
+    }
+    return status;
 }
 
-void CAN::recevoirMsg(){
+// --- reception de messages ---
+void CAN::recevoirMsg(QStandardItemModel *model)
+{
+    if (!mux || !mux->carteOuverte || !model) {
+        return;
+    }
 
+    unsigned short wCount = 0;   // Nombre d'évènements CAN présents dans la FIFO
+    unsigned short wMax   = 0;   // Capacité maximale de la FIFO
+
+    tMuxStatus st = CanGetFifoRxLevel(
+        mux->wCard,
+        mux->hMuxConfigMode.wBusInterface,
+        0,          // 0 = FIFO globale
+        &wCount,
+        &wMax
+        );
+
+    if (st != STATUS_OK || wCount == 0) {
+        return;
+    }
+
+    for (unsigned short i = 0; i < wCount; ++i) {
+
+        tCanEvent evt{};
+        st = CanGetEvent(
+            mux->wCard,
+            mux->hMuxConfigMode.wBusInterface,
+            &evt
+            );
+
+        if (st != STATUS_OK) {
+            qDebug() << "[CAN RX] Erreur CanGetEvent, code =" << st;
+            break;
+        }
+
+        // --- DEBUG : log brut pour voir ce qui arrive vraiment ---
+        qDebug() << "[CAN EVT]"
+                 << "type =" << evt.eTypeEvent
+                 << "svc ="  << evt.eService
+                 << "id ="   << QString("0x%1").arg(evt.dwIdent, 0, 16);
+
+        bool isMsgType =
+            (evt.eTypeEvent == EVENT_CAN_MSGRX)  ||
+            (evt.eTypeEvent == EVENT_CAN_MSGTX);
+
+        if (!isMsgType) {
+            continue;
+        }
+
+        bool isDataSvc =
+            (evt.eService == CAN_SVC_RECEIVE_DATA)  ||
+            (evt.eService == CAN_SVC_TRANSMIT_DATA);
+
+        if (!isDataSvc) {
+            continue;
+        }
+
+        // Conversion du timestamp en HH:MM:SS.mmm
+        double time_ms = evt.dwTimeStamp / 10.0;
+        int total_ms   = static_cast<int>(time_ms);
+
+        int heures  = total_ms / 3600000;
+        int reste   = total_ms % 3600000;
+        int minutes = reste / 60000;
+        reste       = reste % 60000;
+        int secondes = reste / 1000;
+        int ms       = reste % 1000;
+
+        QString timeStr = QString("%1:%2:%3.%4")
+                              .arg(heures,  2, 10, QLatin1Char('0'))
+                              .arg(minutes, 2, 10, QLatin1Char('0'))
+                              .arg(secondes,2, 10, QLatin1Char('0'))
+                              .arg(ms,      3, 10, QLatin1Char('0'));
+
+        // Données hexadécimales
+        QString dataStr;
+        int dataLen = qMin<int>(evt.wDataLen, 8); // sécurité
+
+        for (int b = 0; b < dataLen; ++b) {
+            dataStr += QString("%1 ")
+                           .arg(evt.bData[b], 2, 16, QLatin1Char('0'))
+                           .toUpper();
+        }
+
+        // Ligne affichée dans la ListView
+        QString line = QString("%1   ID:0x%2   Lg:%3   Data:%4   Type:%5   Svc:%6")
+                           .arg(timeStr)
+                           .arg(evt.dwIdent, 0, 16).toUpper()
+                           .arg(dataLen)
+                           .arg(dataStr.trimmed())
+                           .arg(evt.eTypeEvent)
+                           .arg(evt.eService);
+
+        QStandardItem *item = new QStandardItem(line);
+        model->appendRow(item);
+
+        // Option : limite le nombre de lignes pour éviter de saturer la RAM
+        const int maxRows = 2000;
+        if (model->rowCount() > maxRows) {
+            model->removeRow(0);
+        }
+    }
 }

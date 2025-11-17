@@ -5,14 +5,18 @@
 #include "refmux.h"
 #include <QDebug>
 #include <QMessageBox>
+#include <QString>
+#include <QStandardItemModel>
+
 
 class CAN
 {
 public:
     CAN(Mux *m);
     tMuxStatus configurerBus();
-    void envoieMsgPeriodique();
+    tMuxStatus envoieMsgPeriodique(unsigned long ident);
     void recevoirMsg();
+    void recevoirMsg(QStandardItemModel *model);
     unsigned short wCard, wBus;
 
     Mux *mux;
