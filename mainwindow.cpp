@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+
 #include <QLibrary>
 #include <QLibrary>
 #include <QMessageBox>
@@ -16,14 +17,14 @@ MainWindow::MainWindow(QWidget *parent)
     mux = new Mux(); //initialisation de la classe mux
     can = new CAN(mux);
 
-    modelCan = new QStandardItemModel(this);
-    timermsg = new QTimer(this);
+    modelCan   = new QStandardItemModel(this);
+    timermsg   = new QTimer(this);
     timerTrames = new QTimer(this);
 
     ui->listView->setModel(modelCan);
 
-    connect(timermsg, &QTimer::timeout,this, &MainWindow::recevoir);
-    connect(timerTrames, &QTimer::timeout,this, &MainWindow::envoyerTrameSuivante);
+    connect(timermsg,   &QTimer::timeout, this, &MainWindow::recevoir);
+    connect(timerTrames,&QTimer::timeout, this, &MainWindow::envoyerTrameSuivante);
 
     initialiserComboCartes();
 
@@ -40,6 +41,7 @@ MainWindow::MainWindow(QWidget *parent)
         QMessageBox::warning(this, "Erreur", "Aucune carte détectée !");
         return;
     }
+
     qDebug() << "Nombre de cartes détectées :" << mux->dwCardsCount;
     mux->ouvrirComCarte();
 }
@@ -77,10 +79,11 @@ void MainWindow::initialiserComboCartes()
                 combo->addItem(info.description, QVariant(info.index));
             }
             // Mettre à jour le label nbCarte avec le nombre de cartes trouvées
-            ui->nbCartes->setText("Nombre de cartes libres : "+QString::number(listeCartes.size()));
+            ui->nbCartes->setText("Nombre de cartes libres : " + QString::number(listeCartes.size()));
         }
     } else {
-        QMessageBox::warning(this, "Erreur", QString("Impossible de récupérer la liste des cartes : Code %1").arg(status));
+        QMessageBox::warning(this, "Erreur",
+                             QString("Impossible de récupérer la liste des cartes : Code %1").arg(status));
         // Gérer l'erreur : désactiver le combo, afficher un message, etc.
         ui->comboBoxCartes->clear();
         ui->comboBoxCartes->addItem("Erreur de récupération");
@@ -91,7 +94,7 @@ void MainWindow::initialiserComboCartes()
     }
 }
 
-
+// --- btn de connexion a la carte ---
 void MainWindow::on_connection_clicked()
 {
     int indexCombo = ui->comboBoxCartes->currentIndex();
@@ -126,7 +129,8 @@ void MainWindow::on_connection_clicked()
     // --- Ouvrir la nouvelle carte ---
     tMuxStatus status = mux->ouvrirComCarte();
     if (status != STATUS_OK) {
-        QMessageBox::critical(this, "Erreur", QString("Impossible d'ouvrir la carte %1 (code %2)").arg(indexCarte).arg(status));
+        QMessageBox::critical(this, "Erreur",
+                              QString("Impossible d'ouvrir la carte %1 (code %2)").arg(indexCarte).arg(status));
         return;
     }
 
@@ -196,7 +200,7 @@ void MainWindow::on_EnvoyerTrames_clicked()
         return;
     }
 
-    indexTrame = 0; // recommence à la première trame
+    indexTrame = 0;          // recommence à la première trame
     timerTrames->start(100); // 100 ms entre chaque trame
 
     ui->informationTrames->setText("Envoi périodique des 6 trames PSA...");
@@ -221,11 +225,11 @@ void MainWindow::envoyerTrameSuivante()
 
     if (st != STATUS_OK) {
         ui->informationTrames->setText(
-            QString("Erreur sur trame 0x%1").arg(ident,0,16).toUpper()
+            QString("Erreur sur trame 0x%1").arg(ident, 0, 16).toUpper()
             );
     } else {
         ui->informationTrames->setText(
-            QString("Envoi trame 0x%1").arg(ident,0,16).toUpper()
+            QString("Envoi trame 0x%1").arg(ident, 0, 16).toUpper()
             );
     }
 }
