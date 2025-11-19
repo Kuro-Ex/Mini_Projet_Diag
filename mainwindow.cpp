@@ -3,7 +3,7 @@
 #include <QLibrary>
 #include <QLibrary>
 #include <QMessageBox>
-#include <QComboBox> // Pour accéder au combo box
+#include <QComboBox>
 #include <QDebug>
 #include <QVariant>
 #include <QTimer>
@@ -17,14 +17,15 @@ MainWindow::MainWindow(QWidget *parent)
     can = new CAN(mux);
 
     modelCan = new QStandardItemModel(this);
+    timermsg = new QTimer(this);
+    timerTrames = new QTimer(this);
+
     ui->listView->setModel(modelCan);
 
-    timermsg = new QTimer(this);
-    connect(timermsg, &QTimer::timeout,
-            this, &MainWindow::recevoir);
+    connect(timermsg, &QTimer::timeout,this, &MainWindow::recevoir);
+    connect(timerTrames, &QTimer::timeout,this, &MainWindow::envoyerTrameSuivante);
 
     initialiserComboCartes();
-    initialiserComboTrames();
 
     // Chargement dynamique de la bibliothèque MuxDLL
     QLibrary *lib = new QLibrary("MuxDLL");
@@ -41,7 +42,6 @@ MainWindow::MainWindow(QWidget *parent)
     }
     qDebug() << "Nombre de cartes détectées :" << mux->dwCardsCount;
     mux->ouvrirComCarte();
-
 }
 
 MainWindow::~MainWindow()
@@ -184,52 +184,48 @@ void MainWindow::on_refresh_clicked()
 
     // Relancer la détection et remplir le combo box
     initialiserComboCartes();
-}
 
-// --- Insertion des trames dans le combobox ---
-void MainWindow::initialiserComboTrames()
-{
-    ui->comboBoxTrames->clear();
-
-    ui->comboBoxTrames->addItem("0x0F6 ", QVariant(0x0F6));
-    ui->comboBoxTrames->addItem("0x036 ", QVariant(0x036));
-    ui->comboBoxTrames->addItem("0x168 ", QVariant(0x168));
-    ui->comboBoxTrames->addItem("0x128 ", QVariant(0x128));
-    ui->comboBoxTrames->addItem("0x0B6 ", QVariant(0x0B6));
-    ui->comboBoxTrames->addItem("0x161 ", QVariant(0x161));
-
-    ui->comboBoxTrames->setCurrentIndex(0);
+    timerTrames->stop();
 }
 
 // --- Envoie des trames ---
 void MainWindow::on_EnvoyerTrames_clicked()
 {
-    int index = ui->comboBoxTrames->currentIndex();
-
-    if (index < 0) {
-        QMessageBox::warning(this, "CAN", "Aucune trame sélectionnée.");
+    if (!mux || !mux->carteOuverte) {
+        QMessageBox::warning(this, "CAN", "Aucune carte ouverte !");
         return;
     }
 
-    QVariant data = ui->comboBoxTrames->itemData(index);
+    indexTrame = 0; // recommence à la première trame
+    timerTrames->start(100); // 100 ms entre chaque trame
 
-    if (!data.isValid()) {
-        QMessageBox::warning(this, "CAN", "Index invalide dans comboBoxTrames.");
-        return;
-    }
+    ui->informationTrames->setText("Envoi périodique des 6 trames PSA...");
+}
 
-    unsigned long ident = data.toUInt();
+void MainWindow::on_StopTrames_clicked()
+{
+    timerTrames->stop();
+    ui->informationTrames->setText("Envoi des trames arrêté.");
+}
 
-    tMuxStatus status = can->envoieMsgPeriodique(ident);
+// --- envoie périodique des trames ---
+void MainWindow::envoyerTrameSuivante()
+{
+    if (indexTrame >= tramesPSA.size())
+        indexTrame = 0;  // boucle infinie
 
-    if (status == STATUS_OK) {
+    unsigned long ident = tramesPSA[indexTrame];
+    indexTrame++;
+
+    tMuxStatus st = can->envoieMsgPeriodique(ident);
+
+    if (st != STATUS_OK) {
         ui->informationTrames->setText(
-            QString("Trame 0x%1 envoyée !")
-                .arg(ident, 0, 16).toUpper()
+            QString("Erreur sur trame 0x%1").arg(ident,0,16).toUpper()
             );
     } else {
         ui->informationTrames->setText(
-            QString("Erreur envoi trame 0x%1").arg(ident, 0, 16).toUpper()
+            QString("Envoi trame 0x%1").arg(ident,0,16).toUpper()
             );
     }
 }

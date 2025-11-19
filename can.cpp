@@ -40,7 +40,7 @@ tMuxStatus CAN::configurerBus(){
 
     // --- Configuration à 500 kb/s (High Speed) ---
     tCanBus hCanBus{};
-    hCanBus.wBRP = 1;   //1->500 kbit/s 2->250 kbit/s   3->125 kbit/s
+    hCanBus.wBRP = 4;   //1->500 kbit/s 2->250 kbit/s   4->125 kbit/s
     hCanBus.wTSEG1 = 12;
     hCanBus.wTSEG2 = 3;
     hCanBus.wSJW = 1;
@@ -176,13 +176,7 @@ void CAN::recevoirMsg(QStandardItemModel *model)
     unsigned short wCount = 0;   // Nombre d'évènements CAN présents dans la FIFO
     unsigned short wMax   = 0;   // Capacité maximale de la FIFO
 
-    tMuxStatus st = CanGetFifoRxLevel(
-        mux->wCard,
-        mux->hMuxConfigMode.wBusInterface,
-        0,          // 0 = FIFO globale
-        &wCount,
-        &wMax
-        );
+    tMuxStatus st = CanGetFifoRxLevel(mux->wCard,mux->hMuxConfigMode.wBusInterface,0, &wCount, &wMax);  // 0 = FIFO globale
 
     if (st != STATUS_OK || wCount == 0) {
         return;
@@ -270,3 +264,4 @@ void CAN::recevoirMsg(QStandardItemModel *model)
         }
     }
 }
+

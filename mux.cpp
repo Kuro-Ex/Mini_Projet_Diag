@@ -150,8 +150,6 @@ tMuxStatus Mux::recupererDescriptionsCartes(QList<CarteInfo>& listeCartes) {
     return STATUS_OK;
 }
 
-
-
 Mux::~Mux(){
 
 }
