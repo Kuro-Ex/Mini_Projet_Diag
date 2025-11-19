@@ -26,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(timermsg,   &QTimer::timeout, this, &MainWindow::recevoir);
     connect(timerTrames,&QTimer::timeout, this, &MainWindow::envoyerTrameSuivante);
 
-    initialiserComboCartes();
+
 
     // Chargement dynamique de la bibliothèque MuxDLL
     QLibrary *lib = new QLibrary("MuxDLL");
@@ -34,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent)
         QMessageBox::critical(this, "Erreur", "Impossible de charger MuxDLL !");
         return;
     }
+
 
     // --- recherche des cartes ---
     tMuxStatus status = mux->rechercherCartes();
@@ -43,7 +44,9 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     qDebug() << "Nombre de cartes détectées :" << mux->dwCardsCount;
-    mux->ouvrirComCarte();
+
+    initialiserComboCartes();
+
 }
 
 MainWindow::~MainWindow()
@@ -94,10 +97,11 @@ void MainWindow::initialiserComboCartes()
     }
 }
 
-// --- btn de connexion a la carte ---
 void MainWindow::on_connection_clicked()
 {
     int indexCombo = ui->comboBoxCartes->currentIndex();
+
+    mux->ouvrirComCarte();
 
     if (indexCombo < 0) {
         QMessageBox::warning(this, "Erreur", "Aucune carte sélectionnée !");

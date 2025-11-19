@@ -83,7 +83,7 @@ tMuxStatus CAN::envoieMsgPeriodique(unsigned long ident){
     msg.dwReserved2 = 0;
     msg.wDataLen    = 8;
 
-    // Données selon l’ID (d’après ton envoieMsgPeriodique)
+    // Données selon l’ID
     switch (ident) {
     case 0x0F6:
         msg.bData[0] = 0xC8;
@@ -195,12 +195,6 @@ void CAN::recevoirMsg(QStandardItemModel *model)
             qDebug() << "[CAN RX] Erreur CanGetEvent, code =" << st;
             break;
         }
-
-        // --- DEBUG : log brut pour voir ce qui arrive vraiment ---
-        qDebug() << "[CAN EVT]"
-                 << "type =" << evt.eTypeEvent
-                 << "svc ="  << evt.eService
-                 << "id ="   << QString("0x%1").arg(evt.dwIdent, 0, 16);
 
         bool isMsgType =
             (evt.eTypeEvent == EVENT_CAN_MSGRX)  ||
