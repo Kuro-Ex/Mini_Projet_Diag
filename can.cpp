@@ -207,13 +207,13 @@ tMuxStatus CAN::envoieMsgPeriodique(unsigned long ident)
     {
         // régime moteur : facteur 0,125 -> raw = tr/min / 0,125 = tr/min * 8
         unsigned int rawRpm = static_cast<unsigned int>(regimeMoteur*8);
-        msg.bData[0] = static_cast<unsigned int>(rawRpm );
-        msg.bData[1] = static_cast<unsigned int>((rawRpm >> 8) );
+        msg.bData[0] = static_cast<unsigned char>(rawRpm & 0xFF );
+        msg.bData[1] = static_cast<unsigned char>((rawRpm >> 8) & 0xFF );
 
         // vitesse véhicule : facteur 0,01 -> raw = km/h * 100
         unsigned int rawV = static_cast<unsigned int>(vitesse * 100);
-        msg.bData[2] = static_cast<unsigned int>(rawV);
-        msg.bData[3] = static_cast<unsigned int>((rawV >> 8));
+        msg.bData[2] = static_cast<unsigned char>(rawV & 0xFF);
+        msg.bData[3] = static_cast<unsigned char>((rawV >> 8) & 0xFF);
 
         msg.bData[4] = 0x00;
         msg.bData[5] = 0x00;
@@ -364,7 +364,7 @@ void CAN::setRegimeMoteur(int trmin)
 void CAN::setVitesse(int kmh)
 {
     if (kmh < 0) kmh = 0;
-    if (kmh > 250) kmh = 250;
+    if (kmh > 655) kmh = 655;
     vitesse = kmh;
 }
 
