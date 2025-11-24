@@ -28,18 +28,23 @@ public:
 
 private slots:
     void initialiserComboCartes();
-
     void recevoir();
-
     void on_connection_clicked();
-
     void on_refresh_clicked();
-
     void on_EnvoyerTrames_clicked();
-
     void envoyerTrameSuivante();
-
     void on_StopTrames_clicked();
+
+    void on_btnVoyantsOn_clicked();
+    void on_btnVoyantsOff_clicked();
+
+    void on_sliderRegime_valueChanged(int value);
+    void on_sliderVitesse_valueChanged(int value);
+    void on_sliderEssence_valueChanged(int value);
+    void on_sliderTempEau_valueChanged(int value);
+
+    void on_sliderRapportBVA_valueChanged(int value);
+    void on_sliderModeBVA_valueChanged(int value);
 
 private:
     Ui::MainWindow *ui;

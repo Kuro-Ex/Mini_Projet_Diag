@@ -26,8 +26,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(timermsg,   &QTimer::timeout, this, &MainWindow::recevoir);
     connect(timerTrames,&QTimer::timeout, this, &MainWindow::envoyerTrameSuivante);
 
-
-
     // Chargement dynamique de la bibliothèque MuxDLL
     QLibrary *lib = new QLibrary("MuxDLL");
     if (!lib->load()) {
@@ -256,3 +254,59 @@ void MainWindow::recevoir()
         ui->listView->scrollTo(lastIndex);
     }
 }
+
+// --- gestion des btn et sliders pour le tableau de bord ---
+void MainWindow::on_btnVoyantsOn_clicked()
+{
+    if (!can || !mux || !mux->carteOuverte)
+        return;
+
+    can->setVoyantsAll(true);
+    ui->informationTrames->setText("Tous les voyants : ON");
+}
+
+void MainWindow::on_btnVoyantsOff_clicked()
+{
+    if (!can || !mux || !mux->carteOuverte)
+        return;
+
+    can->setVoyantsAll(false);
+    ui->informationTrames->setText("Tous les voyants : OFF");
+}
+
+void MainWindow::on_sliderRegime_valueChanged(int value)
+{
+    if (!can) return;
+    can->setRegimeMoteur(value);   // 0..8000 tr/min
+}
+
+void MainWindow::on_sliderVitesse_valueChanged(int value)
+{
+    if (!can) return;
+    can->setVitesse(value);        // 0..250 km/h
+}
+
+void MainWindow::on_sliderEssence_valueChanged(int value)
+{
+    if (!can) return;
+    can->setJaugeEssence(value);   // 0..100 %
+}
+
+void MainWindow::on_sliderTempEau_valueChanged(int value)
+{
+    if (!can) return;
+    can->setTempEau(value);        // -40..120 par ex.
+}
+
+void MainWindow::on_sliderRapportBVA_valueChanged(int value)
+{
+    if (!can) return;
+    can->setRapportBVAIndex(value); // 0..5
+}
+
+void MainWindow::on_sliderModeBVA_valueChanged(int value)
+{
+    if (!can) return;
+    can->setModeConduiteIndex(value); // 0..2
+}
+
