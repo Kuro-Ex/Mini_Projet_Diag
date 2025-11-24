@@ -28,6 +28,7 @@ public:
     void setVitesse(int kmh);            // compteur
     void setJaugeEssence(int pourcent);  // 0..100%
     void setTempEau(int degC);           // °C
+    void setLuminosite(int value);
 
     // BVA + modes
     void setRapportBVAIndex(int idx);    // slider états P/R/N/D/2/1
@@ -44,6 +45,7 @@ private:
 
     int rapportBVA = 0;     // indice slider 0..5
     int modeConduite = 0;   // indice slider 0..2
+    int  luminosite     = 0;   // 0..15 pour le rétro-éclairage
 
     void initTramesDefaut();
     Mux *mux;

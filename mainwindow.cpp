@@ -310,3 +310,8 @@ void MainWindow::on_sliderModeBVA_valueChanged(int value)
     can->setModeConduiteIndex(value); // 0..2
 }
 
+void MainWindow::on_sliderLuminosite_valueChanged(int value)
+{
+    if (!can) return;
+    can->setLuminosite(value);
+}

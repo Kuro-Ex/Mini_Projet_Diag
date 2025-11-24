@@ -16,6 +16,7 @@ void CAN::initTramesDefaut()
     tempEau      = 20;
     rapportBVA   = 0;  // P
     modeConduite = 0;  // Normal
+    luminosite   = 0;  // rétro-éclairage minimum au démarrage
 }
 
 tMuxStatus CAN::configurerBus(){
@@ -96,8 +97,8 @@ tMuxStatus CAN::envoieMsgPeriodique(unsigned long ident)
         // ---------- 0x0F6 : clé + T° eau (et autres, mais on s'en sert pour T°) ----------
     case 0x0F6:
     {
-        // Octet 0 : on garde une valeur simple (contact + moteur tournant par ex.)
-        msg.bData[0] = 0xC8; // tu peux raffiner plus tard si besoin
+
+        msg.bData[0] = 0xC8;
 
         // Octet 1 : température eau avec offset -40
         int rawTemp = tempEau + 40;      // Physique = raw - 40
@@ -114,17 +115,24 @@ tMuxStatus CAN::envoieMsgPeriodique(unsigned long ident)
         break;
     }
 
-        // ---------- 0x036 : inchangé ----------
+        // ---------- 0x036 : luminosite ----------
     case 0x036:
+    {
         msg.bData[0] = 0x00;
         msg.bData[1] = 0x00;
         msg.bData[2] = 0x00;
-        msg.bData[3] = 0x3D;
-        msg.bData[4] = 0x01;
+
+        // Octet 3 : 0x3?  où ? = luminosité (0..15)
+        unsigned char lum = static_cast<unsigned char>(luminosite & 0x0F);
+        msg.bData[3] = static_cast<unsigned char>(0x30 | lum);
+        // 0x30 = haut nibble de 0x3D -> on garde jour/nuit/config comme ta valeur initiale
+
+        msg.bData[4] = 0x01;   // mode normal comme dans ton code d’origine
         msg.bData[5] = 0x00;
         msg.bData[6] = 0x00;
         msg.bData[7] = 0x00;
         break;
+    }
 
         // ---------- 0x168 : voyants d’alertes ----------
     case 0x168:
@@ -198,14 +206,14 @@ tMuxStatus CAN::envoieMsgPeriodique(unsigned long ident)
     case 0x0B6:
     {
         // régime moteur : facteur 0,125 -> raw = tr/min / 0,125 = tr/min * 8
-        unsigned int rawRpm = static_cast<unsigned int>(regimeMoteur * 8);
-        msg.bData[0] = static_cast<unsigned char>(rawRpm & 0xFF);
-        msg.bData[1] = static_cast<unsigned char>((rawRpm >> 8) & 0xFF);
+        unsigned int rawRpm = static_cast<unsigned int>(regimeMoteur*8);
+        msg.bData[0] = static_cast<unsigned int>(rawRpm );
+        msg.bData[1] = static_cast<unsigned int>((rawRpm >> 8) );
 
         // vitesse véhicule : facteur 0,01 -> raw = km/h * 100
         unsigned int rawV = static_cast<unsigned int>(vitesse * 100);
-        msg.bData[2] = static_cast<unsigned char>(rawV & 0xFF);
-        msg.bData[3] = static_cast<unsigned char>((rawV >> 8) & 0xFF);
+        msg.bData[2] = static_cast<unsigned int>(rawV);
+        msg.bData[3] = static_cast<unsigned int>((rawV >> 8));
 
         msg.bData[4] = 0x00;
         msg.bData[5] = 0x00;
@@ -349,7 +357,7 @@ void CAN::setVoyantsAll(bool on)
 void CAN::setRegimeMoteur(int trmin)
 {
     if (trmin < 0) trmin = 0;
-    if (trmin > 8000) trmin = 8000;
+    if (trmin > 8191) trmin = 8191;
     regimeMoteur = trmin;
 }
 
@@ -386,4 +394,11 @@ void CAN::setModeConduiteIndex(int idx)
     if (idx < 0) idx = 0;
     if (idx > 2) idx = 2;
     modeConduite = idx;
+}
+
+void CAN::setLuminosite(int value)
+{
+    if (value < 0)  value = 0;
+    if (value > 15) value = 15;
+    luminosite = value;
 }

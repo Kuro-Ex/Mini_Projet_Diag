@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1354</width>
-    <height>944</height>
+    <width>1140</width>
+    <height>568</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,10 +17,10 @@
    <widget class="QPushButton" name="connection">
     <property name="geometry">
      <rect>
-      <x>390</x>
-      <y>680</y>
+      <x>380</x>
+      <y>30</y>
       <width>131</width>
-      <height>41</height>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
@@ -30,8 +30,8 @@
    <widget class="QPushButton" name="refresh">
     <property name="geometry">
      <rect>
-      <x>390</x>
-      <y>730</y>
+      <x>990</x>
+      <y>10</y>
       <width>131</width>
       <height>41</height>
      </rect>
@@ -43,8 +43,8 @@
    <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>670</y>
+      <x>10</x>
+      <y>10</y>
       <width>351</width>
       <height>141</height>
      </rect>
@@ -90,8 +90,8 @@ N° de série : </string>
    <widget class="QLabel" name="nbCartes">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>630</y>
+      <x>10</x>
+      <y>160</y>
       <width>331</width>
       <height>31</height>
      </rect>
@@ -106,10 +106,10 @@ N° de série : </string>
    <widget class="QGroupBox" name="groupBox_2">
     <property name="geometry">
      <rect>
-      <x>890</x>
-      <y>510</y>
+      <x>530</x>
+      <y>20</y>
       <width>421</width>
-      <height>141</height>
+      <height>131</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -123,7 +123,7 @@ N° de série : </string>
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>30</y>
+       <y>20</y>
        <width>401</width>
        <height>101</height>
       </rect>
@@ -139,8 +139,8 @@ N° de série : </string>
    <widget class="QPushButton" name="EnvoyerTrames">
     <property name="geometry">
      <rect>
-      <x>390</x>
-      <y>780</y>
+      <x>380</x>
+      <y>70</y>
       <width>131</width>
       <height>41</height>
      </rect>
@@ -152,20 +152,20 @@ N° de série : </string>
    <widget class="QListView" name="listView">
     <property name="geometry">
      <rect>
-      <x>890</x>
-      <y>660</y>
-      <width>421</width>
-      <height>221</height>
+      <x>10</x>
+      <y>200</y>
+      <width>351</width>
+      <height>291</height>
      </rect>
     </property>
    </widget>
    <widget class="QPushButton" name="StopTrames">
     <property name="geometry">
      <rect>
-      <x>540</x>
-      <y>780</y>
+      <x>380</x>
+      <y>120</y>
       <width>131</width>
-      <height>41</height>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
@@ -175,8 +175,8 @@ N° de série : </string>
    <widget class="QSlider" name="sliderRegime">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>110</y>
+      <x>730</x>
+      <y>200</y>
       <width>160</width>
       <height>16</height>
      </rect>
@@ -188,8 +188,8 @@ N° de série : </string>
    <widget class="QSlider" name="sliderVitesse">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>150</y>
+      <x>930</x>
+      <y>200</y>
       <width>160</width>
       <height>16</height>
      </rect>
@@ -201,8 +201,8 @@ N° de série : </string>
    <widget class="QSlider" name="sliderEssence">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>190</y>
+      <x>520</x>
+      <y>250</y>
       <width>160</width>
       <height>16</height>
      </rect>
@@ -214,8 +214,8 @@ N° de série : </string>
    <widget class="QSlider" name="sliderTempEau">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>230</y>
+      <x>730</x>
+      <y>250</y>
       <width>160</width>
       <height>16</height>
      </rect>
@@ -227,8 +227,8 @@ N° de série : </string>
    <widget class="QSlider" name="sliderRapportBVA">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>270</y>
+      <x>930</x>
+      <y>250</y>
       <width>160</width>
       <height>16</height>
      </rect>
@@ -240,8 +240,8 @@ N° de série : </string>
    <widget class="QSlider" name="sliderModeBVA">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>310</y>
+      <x>730</x>
+      <y>300</y>
       <width>160</width>
       <height>16</height>
      </rect>
@@ -253,10 +253,10 @@ N° de série : </string>
    <widget class="QPushButton" name="btnVoyantsOn">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>350</y>
+      <x>490</x>
+      <y>290</y>
       <width>80</width>
-      <height>24</height>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
@@ -266,21 +266,21 @@ N° de série : </string>
    <widget class="QPushButton" name="btnVoyantsOff">
     <property name="geometry">
      <rect>
-      <x>140</x>
-      <y>350</y>
+      <x>600</x>
+      <y>290</y>
       <width>80</width>
-      <height>24</height>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
      <string>VoyantOff</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label">
+   <widget class="QLabel" name="labelRegime">
     <property name="geometry">
      <rect>
-      <x>220</x>
-      <y>110</y>
+      <x>730</x>
+      <y>170</y>
       <width>91</width>
       <height>21</height>
      </rect>
@@ -292,11 +292,11 @@ N° de série : </string>
      <string>: Régime</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_2">
+   <widget class="QLabel" name="labelEssence">
     <property name="geometry">
      <rect>
-      <x>220</x>
-      <y>190</y>
+      <x>520</x>
+      <y>220</y>
       <width>91</width>
       <height>21</height>
      </rect>
@@ -308,11 +308,11 @@ N° de série : </string>
      <string>: Essence</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_3">
+   <widget class="QLabel" name="labelVitesse">
     <property name="geometry">
      <rect>
-      <x>220</x>
-      <y>150</y>
+      <x>930</x>
+      <y>170</y>
       <width>91</width>
       <height>21</height>
      </rect>
@@ -324,11 +324,11 @@ N° de série : </string>
      <string>: Vitesse</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_4">
+   <widget class="QLabel" name="labelRapportBVA">
     <property name="geometry">
      <rect>
-      <x>220</x>
-      <y>270</y>
+      <x>930</x>
+      <y>220</y>
       <width>91</width>
       <height>21</height>
      </rect>
@@ -340,11 +340,11 @@ N° de série : </string>
      <string>: Rapport BVA</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_5">
+   <widget class="QLabel" name="labelTempEau">
     <property name="geometry">
      <rect>
-      <x>220</x>
-      <y>230</y>
+      <x>730</x>
+      <y>220</y>
       <width>91</width>
       <height>21</height>
      </rect>
@@ -356,11 +356,11 @@ N° de série : </string>
      <string>: TempEau</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_6">
+   <widget class="QLabel" name="labelModeBVA">
     <property name="geometry">
      <rect>
-      <x>220</x>
-      <y>310</y>
+      <x>730</x>
+      <y>270</y>
       <width>91</width>
       <height>21</height>
      </rect>
@@ -372,13 +372,42 @@ N° de série : </string>
      <string>: Mode BVA</string>
     </property>
    </widget>
+   <widget class="QSlider" name="sliderLuminosite">
+    <property name="geometry">
+     <rect>
+      <x>520</x>
+      <y>200</y>
+      <width>160</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelLuminosite">
+    <property name="geometry">
+     <rect>
+      <x>520</x>
+      <y>170</y>
+      <width>91</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 700 10pt &quot;Segoe UI&quot;;</string>
+    </property>
+    <property name="text">
+     <string>: Luminosité</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1354</width>
+     <width>1140</width>
      <height>21</height>
     </rect>
    </property>

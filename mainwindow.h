@@ -45,6 +45,7 @@ private slots:
 
     void on_sliderRapportBVA_valueChanged(int value);
     void on_sliderModeBVA_valueChanged(int value);
+    void on_sliderLuminosite_valueChanged(int value);
 
 private:
     Ui::MainWindow *ui;
