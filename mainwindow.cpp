@@ -248,8 +248,6 @@ void MainWindow::recevoir()
     int rowCount = modelCan->rowCount();
     if (rowCount <= 0)
         return;
-
-
 }
 
 // --- gestion des btn et sliders pour le tableau de bord ---
