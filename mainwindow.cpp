@@ -249,10 +249,7 @@ void MainWindow::recevoir()
     if (rowCount <= 0)
         return;
 
-    QModelIndex lastIndex = modelCan->index(rowCount - 1, 0);
-    if (lastIndex.isValid()) {
-        ui->listView->scrollTo(lastIndex);
-    }
+
 }
 
 // --- gestion des btn et sliders pour le tableau de bord ---
@@ -277,19 +274,22 @@ void MainWindow::on_btnVoyantsOff_clicked()
 void MainWindow::on_sliderRegime_valueChanged(int value)
 {
     if (!can) return;
-    can->setRegimeMoteur(value);   // 0..8000 tr/min
+    can->setRegimeMoteur(value);   // 0..8191 tr/min
+    ui->labelRegime->setText(QString("Régime : %1 tr/min ").arg(value));
 }
 
 void MainWindow::on_sliderVitesse_valueChanged(int value)
 {
     if (!can) return;
     can->setVitesse(value);        // 0..250 km/h
+    ui->labelVitesse->setText(QString("Vitesse : %1 km/h").arg(value));
 }
 
 void MainWindow::on_sliderEssence_valueChanged(int value)
 {
     if (!can) return;
     can->setJaugeEssence(value);   // 0..100 %
+    ui->labelEssence->setText(QString("Essence : %1 %").arg(value));
 }
 
 void MainWindow::on_sliderTempEau_valueChanged(int value)

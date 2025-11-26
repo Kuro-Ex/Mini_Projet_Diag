@@ -1,5 +1,7 @@
 #include "can.h"
 #include "refmux.h"
+#include "ui_mainwindow.h"
+
 
 CAN::CAN(Mux *m) {
     mux = m;
@@ -202,18 +204,19 @@ tMuxStatus CAN::envoieMsgPeriodique(unsigned long ident)
         break;
     }
 
-        // ---------- 0x0B6 : micromoteurs compte-tour + vitesse ----------
+    // ---------- 0x0B6 : micromoteurs compte-tour + vitesse ----------
     case 0x0B6:
     {
-        // régime moteur : facteur 0,125 -> raw = tr/min / 0,125 = tr/min * 8
-        unsigned int rawRpm = static_cast<unsigned int>(regimeMoteur*8);
-        msg.bData[0] = static_cast<unsigned char>(rawRpm & 0xFF );
-        msg.bData[1] = static_cast<unsigned char>((rawRpm >> 8) & 0xFF );
+        // régime moteur : Physique = raw * 0.125  -> raw = RPM / 0.125
+        unsigned int rawRpm = static_cast<unsigned int>(regimeMoteur / 0.125);
 
-        // vitesse véhicule : facteur 0,01 -> raw = km/h * 100
-        unsigned int rawV = static_cast<unsigned int>(vitesse * 100);
-        msg.bData[2] = static_cast<unsigned char>(rawV & 0xFF);
-        msg.bData[3] = static_cast<unsigned char>((rawV >> 8) & 0xFF);
+        msg.bData[0] = static_cast<unsigned char>((rawRpm >> 8) & 0xFF);
+        msg.bData[1] = static_cast<unsigned char>( rawRpm        & 0xFF);
+
+        // vitesse véhicule : Physique = raw * 0.01 -> raw = km/h / 0.01
+        unsigned int rawV = static_cast<unsigned int>(vitesse / 0.01);
+        msg.bData[2] = static_cast<unsigned char>((rawV >> 8) & 0xFF);
+        msg.bData[3] = static_cast<unsigned char>( rawV       & 0xFF);
 
         msg.bData[4] = 0x00;
         msg.bData[5] = 0x00;
@@ -222,12 +225,13 @@ tMuxStatus CAN::envoieMsgPeriodique(unsigned long ident)
         break;
     }
 
+
         // ---------- 0x161 : micromoteur jauge essence ----------
     case 0x161:
         msg.bData[0] = 0x00;
         msg.bData[1] = 0x00;
         msg.bData[2] = 0x00;
-        msg.bData[3] = static_cast<unsigned char>(jaugeEssence); // 0..100
+        msg.bData[3] = static_cast<unsigned char>(jaugeEssence); // 0..100 %
         msg.bData[4] = 0x00;
         msg.bData[5] = 0x00;
         msg.bData[6] = 0x00;
@@ -357,14 +361,14 @@ void CAN::setVoyantsAll(bool on)
 void CAN::setRegimeMoteur(int trmin)
 {
     if (trmin < 0) trmin = 0;
-    if (trmin > 8191) trmin = 8191;
+    if (trmin > 7000) trmin = 7000;
     regimeMoteur = trmin;
 }
 
 void CAN::setVitesse(int kmh)
 {
     if (kmh < 0) kmh = 0;
-    if (kmh > 655) kmh = 655;
+    if (kmh > 220) kmh = 220;
     vitesse = kmh;
 }
 

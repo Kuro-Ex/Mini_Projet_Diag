@@ -175,11 +175,14 @@ N° de série : </string>
    <widget class="QSlider" name="sliderRegime">
     <property name="geometry">
      <rect>
-      <x>730</x>
+      <x>670</x>
       <y>200</y>
       <width>160</width>
       <height>16</height>
      </rect>
+    </property>
+    <property name="maximum">
+     <number>7000</number>
     </property>
     <property name="orientation">
      <enum>Qt::Horizontal</enum>
@@ -188,11 +191,14 @@ N° de série : </string>
    <widget class="QSlider" name="sliderVitesse">
     <property name="geometry">
      <rect>
-      <x>930</x>
+      <x>870</x>
       <y>200</y>
       <width>160</width>
       <height>16</height>
      </rect>
+    </property>
+    <property name="maximum">
+     <number>220</number>
     </property>
     <property name="orientation">
      <enum>Qt::Horizontal</enum>
@@ -201,7 +207,7 @@ N° de série : </string>
    <widget class="QSlider" name="sliderEssence">
     <property name="geometry">
      <rect>
-      <x>520</x>
+      <x>460</x>
       <y>250</y>
       <width>160</width>
       <height>16</height>
@@ -214,11 +220,14 @@ N° de série : </string>
    <widget class="QSlider" name="sliderTempEau">
     <property name="geometry">
      <rect>
-      <x>730</x>
+      <x>670</x>
       <y>250</y>
       <width>160</width>
       <height>16</height>
      </rect>
+    </property>
+    <property name="maximum">
+     <number>210</number>
     </property>
     <property name="orientation">
      <enum>Qt::Horizontal</enum>
@@ -227,7 +236,7 @@ N° de série : </string>
    <widget class="QSlider" name="sliderRapportBVA">
     <property name="geometry">
      <rect>
-      <x>930</x>
+      <x>870</x>
       <y>250</y>
       <width>160</width>
       <height>16</height>
@@ -240,8 +249,8 @@ N° de série : </string>
    <widget class="QSlider" name="sliderModeBVA">
     <property name="geometry">
      <rect>
-      <x>730</x>
-      <y>300</y>
+      <x>370</x>
+      <y>360</y>
       <width>160</width>
       <height>16</height>
      </rect>
@@ -253,8 +262,8 @@ N° de série : </string>
    <widget class="QPushButton" name="btnVoyantsOn">
     <property name="geometry">
      <rect>
-      <x>490</x>
-      <y>290</y>
+      <x>480</x>
+      <y>280</y>
       <width>80</width>
       <height>31</height>
      </rect>
@@ -266,8 +275,8 @@ N° de série : </string>
    <widget class="QPushButton" name="btnVoyantsOff">
     <property name="geometry">
      <rect>
-      <x>600</x>
-      <y>290</y>
+      <x>380</x>
+      <y>280</y>
       <width>80</width>
       <height>31</height>
      </rect>
@@ -279,9 +288,9 @@ N° de série : </string>
    <widget class="QLabel" name="labelRegime">
     <property name="geometry">
      <rect>
-      <x>730</x>
+      <x>670</x>
       <y>170</y>
-      <width>91</width>
+      <width>161</width>
       <height>21</height>
      </rect>
     </property>
@@ -289,15 +298,15 @@ N° de série : </string>
      <string notr="true">font: 700 10pt &quot;Segoe UI&quot;;</string>
     </property>
     <property name="text">
-     <string>: Régime</string>
+     <string> Régime :</string>
     </property>
    </widget>
    <widget class="QLabel" name="labelEssence">
     <property name="geometry">
      <rect>
-      <x>520</x>
+      <x>460</x>
       <y>220</y>
-      <width>91</width>
+      <width>151</width>
       <height>21</height>
      </rect>
     </property>
@@ -305,15 +314,15 @@ N° de série : </string>
      <string notr="true">font: 700 10pt &quot;Segoe UI&quot;;</string>
     </property>
     <property name="text">
-     <string>: Essence</string>
+     <string>Essence :</string>
     </property>
    </widget>
    <widget class="QLabel" name="labelVitesse">
     <property name="geometry">
      <rect>
-      <x>930</x>
+      <x>870</x>
       <y>170</y>
-      <width>91</width>
+      <width>161</width>
       <height>21</height>
      </rect>
     </property>
@@ -321,15 +330,15 @@ N° de série : </string>
      <string notr="true">font: 700 10pt &quot;Segoe UI&quot;;</string>
     </property>
     <property name="text">
-     <string>: Vitesse</string>
+     <string> Vitesse :</string>
     </property>
    </widget>
    <widget class="QLabel" name="labelRapportBVA">
     <property name="geometry">
      <rect>
-      <x>930</x>
+      <x>870</x>
       <y>220</y>
-      <width>91</width>
+      <width>161</width>
       <height>21</height>
      </rect>
     </property>
@@ -337,15 +346,15 @@ N° de série : </string>
      <string notr="true">font: 700 10pt &quot;Segoe UI&quot;;</string>
     </property>
     <property name="text">
-     <string>: Rapport BVA</string>
+     <string>Rapport BVA :</string>
     </property>
    </widget>
    <widget class="QLabel" name="labelTempEau">
     <property name="geometry">
      <rect>
-      <x>730</x>
+      <x>670</x>
       <y>220</y>
-      <width>91</width>
+      <width>161</width>
       <height>21</height>
      </rect>
     </property>
@@ -353,15 +362,15 @@ N° de série : </string>
      <string notr="true">font: 700 10pt &quot;Segoe UI&quot;;</string>
     </property>
     <property name="text">
-     <string>: TempEau</string>
+     <string>TempEau :</string>
     </property>
    </widget>
    <widget class="QLabel" name="labelModeBVA">
     <property name="geometry">
      <rect>
-      <x>730</x>
-      <y>270</y>
-      <width>91</width>
+      <x>370</x>
+      <y>330</y>
+      <width>151</width>
       <height>21</height>
      </rect>
     </property>
@@ -369,13 +378,13 @@ N° de série : </string>
      <string notr="true">font: 700 10pt &quot;Segoe UI&quot;;</string>
     </property>
     <property name="text">
-     <string>: Mode BVA</string>
+     <string>Mode BVA :</string>
     </property>
    </widget>
    <widget class="QSlider" name="sliderLuminosite">
     <property name="geometry">
      <rect>
-      <x>520</x>
+      <x>460</x>
       <y>200</y>
       <width>160</width>
       <height>16</height>
@@ -388,7 +397,7 @@ N° de série : </string>
    <widget class="QLabel" name="labelLuminosite">
     <property name="geometry">
      <rect>
-      <x>520</x>
+      <x>460</x>
       <y>170</y>
       <width>91</width>
       <height>21</height>
@@ -398,7 +407,189 @@ N° de série : </string>
      <string notr="true">font: 700 10pt &quot;Segoe UI&quot;;</string>
     </property>
     <property name="text">
-     <string>: Luminosité</string>
+     <string>Luminosité :</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>290</y>
+      <width>80</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Cligg</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_2">
+    <property name="geometry">
+     <rect>
+      <x>820</x>
+      <y>290</y>
+      <width>80</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Cligd</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_3">
+    <property name="geometry">
+     <rect>
+      <x>710</x>
+      <y>290</y>
+      <width>80</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>STOP</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_4">
+    <property name="geometry">
+     <rect>
+      <x>560</x>
+      <y>340</y>
+      <width>80</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PushButton</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_5">
+    <property name="geometry">
+     <rect>
+      <x>660</x>
+      <y>340</y>
+      <width>80</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PushButton</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_6">
+    <property name="geometry">
+     <rect>
+      <x>760</x>
+      <y>340</y>
+      <width>80</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PushButton</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_7">
+    <property name="geometry">
+     <rect>
+      <x>860</x>
+      <y>340</y>
+      <width>80</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PushButton</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_8">
+    <property name="geometry">
+     <rect>
+      <x>710</x>
+      <y>380</y>
+      <width>80</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PushButton</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_9">
+    <property name="geometry">
+     <rect>
+      <x>820</x>
+      <y>380</y>
+      <width>80</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PushButton</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_10">
+    <property name="geometry">
+     <rect>
+      <x>930</x>
+      <y>380</y>
+      <width>80</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PushButton</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_11">
+    <property name="geometry">
+     <rect>
+      <x>660</x>
+      <y>420</y>
+      <width>80</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PushButton</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_12">
+    <property name="geometry">
+     <rect>
+      <x>560</x>
+      <y>420</y>
+      <width>80</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PushButton</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_13">
+    <property name="geometry">
+     <rect>
+      <x>760</x>
+      <y>420</y>
+      <width>80</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PushButton</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_14">
+    <property name="geometry">
+     <rect>
+      <x>860</x>
+      <y>420</y>
+      <width>80</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PushButton</string>
     </property>
    </widget>
   </widget>
