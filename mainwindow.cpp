@@ -21,10 +21,6 @@ MainWindow::MainWindow(QWidget *parent)
     timermsg   = new QTimer(this);
     timerTrames = new QTimer(this);
 
-    // état initial : cligno éteint
-    m_clignoGaucheOn = false;
-
-
     ui->listView->setModel(modelCan);
 
     connect(timermsg,   &QTimer::timeout, this, &MainWindow::recevoir);
@@ -335,7 +331,6 @@ void MainWindow::on_clignotantGauche_clicked()
     }
 }
 
-
 void MainWindow::on_clignotantDroite_clicked()
 {
     // on inverse l'état
@@ -353,7 +348,6 @@ void MainWindow::on_clignotantDroite_clicked()
         can->setClignoDroite(m_clignoDroiteOn);
     }
 }
-
 
 void MainWindow::on_feuxBrouillardAr_clicked()
 {
@@ -373,7 +367,6 @@ void MainWindow::on_feuxBrouillardAr_clicked()
     }
 }
 
-
 void MainWindow::on_feuxBrouillardAv_clicked()
 {
     // on inverse l'état
@@ -391,7 +384,6 @@ void MainWindow::on_feuxBrouillardAv_clicked()
         can->setfeuxBrouilAV(m_brouilAv);
     }
 }
-
 
 void MainWindow::on_feuxCroisement_clicked()
 {
@@ -411,7 +403,6 @@ void MainWindow::on_feuxCroisement_clicked()
     }
 }
 
-
 void MainWindow::on_feuxDeRoute_clicked()
 {
     // on inverse l'état
@@ -426,7 +417,116 @@ void MainWindow::on_feuxDeRoute_clicked()
 
     // on informe la couche CAN
     if (can) {
-        can->setfeuxCrois(m_Route);
+        can->setfeuxRoute(m_Route);
+    }
+}
+
+void MainWindow::on_service_clicked(){
+
+    // on inverse l'état
+    m_service = !m_service;
+
+    // on met la bonne icône
+    if (m_service) {
+        ui->service->setIcon(QIcon(":/img/build/warningOn.png"));
+    } else {
+        ui->service->setIcon(QIcon(":/img/build/warningOff.png"));
+    }
+
+    // on informe la couche CAN
+    if (can) {
+        can->setService(m_service);
+    }
+}
+
+void MainWindow::on_Frpk_clicked()
+{
+    // on inverse l'état
+    m_frpk = !m_frpk;
+
+    // on met la bonne icône
+    if (m_frpk) {
+        ui->Frpk->setIcon(QIcon(":/img/build/frpkOn.png"));
+    } else {
+        ui->Frpk->setIcon(QIcon(":/img/build/frpkOff.png"));
+    }
+
+    // on informe la couche CAN
+    if (can) {
+        can->setFrpk(m_frpk);
+    }
+}
+
+void MainWindow::on_abs_clicked()
+{
+    // on inverse l'état
+    m_abs = !m_abs;
+
+    // on met la bonne icône
+    if (m_abs) {
+        ui->abs->setIcon(QIcon(":/img/build/ABSOn.png"));
+    } else {
+        ui->abs->setIcon(QIcon(":/img/build/ABSOff.png"));
+    }
+
+    // on informe la couche CAN
+    if (can) {
+        can->setAbs(m_abs);
+    }
+}
+void MainWindow::on_AlerteHuile_clicked()
+{
+    // on inverse l'état
+    m_alerteHuile = !m_alerteHuile;
+
+    // on met la bonne icône
+    if (m_alerteHuile) {
+        ui->AlerteHuile->setIcon(QIcon(":/img/build/AlerteHuileOn.png"));
+    } else {
+        ui->AlerteHuile->setIcon(QIcon(":/img/build/AlerteHuile.png"));
+    }
+
+    // on informe la couche CAN
+    if (can) {
+        can->setAlerteHuile(m_alerteHuile);
+    }
+}
+
+
+void MainWindow::on_esp_clicked()
+{
+    // on inverse l'état
+    m_esp = !m_esp;
+
+    // on met la bonne icône
+    if (m_esp) {
+        ui->esp->setIcon(QIcon(":/img/build/ESPON.png"));
+    } else {
+        ui->esp->setIcon(QIcon(":/img/build/ESPOff.png"));
+    }
+
+    // on informe la couche CAN
+    if (can) {
+        can->setESPI(m_esp);
+    }
+}
+
+
+void MainWindow::on_secPassDef_clicked()
+{
+    // on inverse l'état
+    m_secPassDef = !m_secPassDef;
+
+    // on met la bonne icône
+    if (m_secPassDef) {
+        ui->secPassDef->setIcon(QIcon(":/img/build/motDeffOn.png"));
+    } else {
+        ui->secPassDef->setIcon(QIcon(":/img/build/motDeffOff.png"));
+    }
+
+    // on informe la couche CAN
+    if (can) {
+        can->setSecPassDef(m_secPassDef);
     }
 }
 

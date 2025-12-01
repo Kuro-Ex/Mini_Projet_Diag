@@ -415,7 +415,7 @@ N° de série : </string>
      <rect>
       <x>530</x>
       <y>180</y>
-      <width>481</width>
+      <width>511</width>
       <height>281</height>
      </rect>
     </property>
@@ -481,13 +481,13 @@ N° de série : </string>
       <bool>false</bool>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButton_5">
+    <widget class="QPushButton" name="Frpk">
      <property name="geometry">
       <rect>
        <x>150</x>
        <y>100</y>
        <width>80</width>
-       <height>41</height>
+       <height>51</height>
       </rect>
      </property>
      <property name="styleSheet">
@@ -496,6 +496,16 @@ N° de série : </string>
      </property>
      <property name="text">
       <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/img/build/frpkOff.png</normaloff>:/img/build/frpkOff.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>64</width>
+       <height>64</height>
+      </size>
      </property>
     </widget>
     <widget class="QPushButton" name="pushButton_10">
@@ -515,7 +525,7 @@ N° de série : </string>
       <string>PushButton</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="warning">
+    <widget class="QPushButton" name="service">
      <property name="geometry">
       <rect>
        <x>30</x>
@@ -599,12 +609,12 @@ N° de série : </string>
       </size>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButton_8">
+    <widget class="QPushButton" name="secPassDef">
      <property name="geometry">
       <rect>
        <x>150</x>
        <y>153</y>
-       <width>80</width>
+       <width>81</width>
        <height>41</height>
       </rect>
      </property>
@@ -759,16 +769,16 @@ N° de série : </string>
      </property>
      <property name="iconSize">
       <size>
-       <width>64</width>
-       <height>64</height>
+       <width>80</width>
+       <height>80</height>
       </size>
      </property>
     </widget>
     <widget class="QPushButton" name="pushButton_9">
      <property name="geometry">
       <rect>
-       <x>250</x>
-       <y>153</y>
+       <x>50</x>
+       <y>150</y>
        <width>80</width>
        <height>41</height>
       </rect>
@@ -788,6 +798,35 @@ N° de série : </string>
       <size>
        <width>64</width>
        <height>64</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="AlerteHuile">
+     <property name="geometry">
+      <rect>
+       <x>390</x>
+       <y>20</y>
+       <width>111</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">    border: none;
+    background-color: transparent;
+
+</string>
+     </property>
+     <property name="text">
+      <string>AlerteHuile</string>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/img/build/AlerteHuile.png</normaloff>:/img/build/AlerteHuile.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
       </size>
      </property>
     </widget>

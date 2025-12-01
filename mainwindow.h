@@ -53,6 +53,12 @@ private slots:
     void on_feuxBrouillardAv_clicked();
     void on_feuxCroisement_clicked();
     void on_feuxDeRoute_clicked();
+    void on_Frpk_clicked();
+    void on_service_clicked();
+    void on_abs_clicked();
+    void on_AlerteHuile_clicked();
+    void on_esp_clicked();
+    void on_secPassDef_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -74,6 +80,11 @@ private:
     bool m_brouilAv = false;
     bool m_Crois = false;
     bool m_Route = false;
-
+    bool m_service = false;
+    bool m_frpk = false;
+    bool m_abs = false;
+    bool m_alerteHuile = false;
+    bool m_esp = false;
+    bool m_secPassDef = false;
 };
 #endif // MAINWINDOW_H

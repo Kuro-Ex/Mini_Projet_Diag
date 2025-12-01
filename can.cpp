@@ -1,6 +1,5 @@
 #include "can.h"
 #include "refmux.h"
-#include "ui_mainwindow.h"
 
 
 CAN::CAN(Mux *m) {
@@ -19,6 +18,7 @@ void CAN::initTramesDefaut()
     rapportBVA   = 0;  // P
     modeConduite = 0;  // Normal
     luminosite   = 0;  // rétro-éclairage minimum au démarrage
+
 }
 
 tMuxStatus CAN::configurerBus(){
@@ -138,72 +138,78 @@ tMuxStatus CAN::envoieMsgPeriodique(unsigned long ident)
 
         // ---------- 0x168 : voyants d’alertes ----------
     case 0x168:
+    {
+        for (int i = 0; i < 8; ++i) {
+            msg.bData[i] = 0x00;
+        }
+
+        unsigned char oct0 = 0x00;   // Alerte T huile / T eau
+        unsigned char oct3 = 0x00;   // REF_DEF, DSup_DEF, ABS_DEF, ...
+        unsigned char oct4 = 0x00;
+
         if (voyantsOn) {
-            // Alerte T huile + T eau
-            msg.bData[0] = 0x03;
-            msg.bData[1] = 0x00;
-            msg.bData[2] = 0x00;
-            msg.bData[3] = 0xFF;  // DEF divers
+            oct0              |= 0x03;    // T huile + T eau ON
+            oct3              |= 0xFF;
             msg.bData[4] = 0xFF;
             msg.bData[5] = 0xFF;
-        } else {
-            msg.bData[0] = 0x00;
-            msg.bData[1] = 0x00;
-            msg.bData[2] = 0x00;
-            msg.bData[3] = 0x00;
-            msg.bData[4] = 0x00;
-            msg.bData[5] = 0x00;
         }
-        msg.bData[6] = 0x00;
-        msg.bData[7] = 0x00;
+
+        // ABS_DEF individuel : bit 5 de l’octet 3
+        if (abs)         oct3 |= 0x20;
+        if(secPassDef)   oct4 |= 0x10;
+
+        msg.bData[0] = oct0;
+        msg.bData[3] = oct3;
+        msg.bData[4] = oct4;
         break;
+    }
+
 
         // ---------- 0x128 : voyants + BVA + modes ----------
     case 0x128:
     {
-        // Par défaut tout à 0 (voyants éteints)
+
         msg.bData[0] = 0x00;
         msg.bData[1] = 0x00;
         msg.bData[2] = 0x00;
         msg.bData[3] = 0x00;
 
-        unsigned char feux = 0x00;     // Octet 4
+        unsigned char oct4 = 0x00;
+        unsigned char oct1 = 0x00;
+        unsigned char oct2 = 0x00;
+        unsigned char oct0 = 0x00;
+
 
         if (voyantsOn) {
-            // si tu veux garder ton bouton "tous voyants"
             msg.bData[0] = 0xE0;      // FRPK / AL_essence / Pre_chauff
             msg.bData[1] = 0xE0;      // Service / Stop / ABS
-            msg.bData[2] = 0xE0;      // ESPI / ESRA / WARNING
             msg.bData[3] = 0xE0;      // pied frein
-            feux |= 0x7C;             // ex : tous les feux sauf clignos (bits 2 et 1)
+
+            oct1 |= 0xE0;
+            // tous les feux
+            oct4 |= 0x7C;
         }
 
         // --- voyants individuels ---
-        if (clignoGauche) {
-            feux |= 0x02;
-        }
-        if (clignoDroite) {
-            feux |= 0x04;
-        }
-        if (feuxBrouilAR){
-            feux |= 0x08;
-        }
-        if (feuxBrouilAV){
-            feux |= 0x10;
-        }
-        if (feuxRoute){
-            feux |= 0x20;
-        }
-        if (feuxCrois){
-            feux |= 0x40;
-        }
-        if (feuxPos){
-            feux |= 0x80;
-        }
+        if (frpk)         oct0 |= 0x20;
+        if(alerteHuile)   oct0 |= 0x10;
 
-        msg.bData[4] = feux;
+        if (service)      oct1 |= 0x80;
 
-        // Octet 5 : combine actif
+        if(espI)          oct2 |= 0x10;
+
+        if (clignoGauche) oct4 |= 0x02;
+        if (clignoDroite) oct4 |= 0x04;
+        if (feuxBrouilAR) oct4 |= 0x08;
+        if (feuxBrouilAV) oct4 |= 0x10;
+        if (feuxRoute)    oct4 |= 0x20;
+        if (feuxCrois)    oct4 |= 0x40;
+        if (feuxPos)      oct4 |= 0x80;
+
+        msg.bData[0] = oct0;
+        msg.bData[1] = oct1;
+        msg.bData[2] = oct2;
+        msg.bData[4] = oct4;
         msg.bData[5] = 0x80;
 
         // --- BVA : octet 6 ---
@@ -465,4 +471,29 @@ void CAN::setfeuxCrois(bool on)
 void CAN::setfeuxPos(bool on)
 {
     feuxPos = on;
+}
+
+void CAN::setService(bool on)
+{
+    service = on;
+}
+
+void CAN::setFrpk(bool on){
+    frpk = on;
+}
+
+void CAN::setAbs(bool on){
+    abs = on;
+}
+
+void CAN::setAlerteHuile(bool on){
+    alerteHuile = on;
+}
+
+void CAN::setESPI(bool on){
+    espI = on;
+}
+
+void CAN::setSecPassDef(bool on){
+    secPassDef = on;
 }

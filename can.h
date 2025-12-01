@@ -40,6 +40,12 @@ public:
     void setfeuxRoute(bool on);
     void setfeuxCrois(bool on);
     void setfeuxPos(bool on);
+    void setService(bool on);
+    void setFrpk(bool on);
+    void setAbs(bool on);
+    void setAlerteHuile(bool on);
+    void setESPI(bool on);
+    void setSecPassDef(bool on);
 
 private:
          // ---------- ETAT COURANT ----------
@@ -51,13 +57,18 @@ private:
     bool feuxRoute = false;
     bool feuxCrois = false;
     bool feuxPos = false;
-
+    bool service = false;
+    bool moteur = false;
+    bool frpk = false;
+    bool abs = false;
+    bool alerteHuile = false;
+    bool espI = false;
+    bool secPassDef = false;
 
     int regimeMoteur = 0;   // tr/min
     int vitesse = 0;        // km/h
     int jaugeEssence = 0;   // %
     int tempEau = 20;       // °C
-
     int rapportBVA = 0;     // indice slider 0..5
     int modeConduite = 0;   // indice slider 0..2
     int  luminosite     = 0;   // 0..15 pour le rétro-éclairage

@@ -23,5 +23,9 @@
         <file>build/motDeffOn.png</file>
         <file>build/secPassDefOff.png</file>
         <file>build/cliggOn.png</file>
+        <file>build/frpkOff.png</file>
+        <file>build/frpkOn.png</file>
+        <file>build/AlerteHuile.png</file>
+        <file>build/AlerteHuileOn.png</file>
     </qresource>
 </RCC>
