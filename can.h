@@ -46,6 +46,7 @@ public:
     void setAlerteHuile(bool on);
     void setESPI(bool on);
     void setSecPassDef(bool on);
+    void setAirBag(bool on);
 
 private:
          // ---------- ETAT COURANT ----------
@@ -64,6 +65,7 @@ private:
     bool alerteHuile = false;
     bool espI = false;
     bool secPassDef = false;
+    bool airBag = false;
 
     int regimeMoteur = 0;   // tr/min
     int vitesse = 0;        // km/h

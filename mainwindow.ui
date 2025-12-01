@@ -508,7 +508,7 @@ N° de série : </string>
       </size>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButton_10">
+    <widget class="QPushButton" name="AirBag">
      <property name="geometry">
       <rect>
        <x>350</x>

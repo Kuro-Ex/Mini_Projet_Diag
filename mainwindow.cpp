@@ -530,3 +530,21 @@ void MainWindow::on_secPassDef_clicked()
     }
 }
 
+void MainWindow::on_AirBag_clicked()
+{
+    // on inverse l'état
+    m_airBag = !m_airBag;
+
+    /* on met la bonne icône
+    if (m_airBag) {
+        ui->AirBag->setIcon(QIcon(":/img/build/motDeffOn.png"));
+    } else {
+        ui->AirBag->setIcon(QIcon(":/img/build/motDeffOff.png"));
+    }*/
+
+    // on informe la couche CAN
+    if (can) {
+        can->setAirBag(m_airBag);
+    }
+}
+

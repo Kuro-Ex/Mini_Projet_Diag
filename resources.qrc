@@ -27,5 +27,7 @@
         <file>build/frpkOn.png</file>
         <file>build/AlerteHuile.png</file>
         <file>build/AlerteHuileOn.png</file>
+        <file>build/airbagOff.png</file>
+        <file>build/airbagOn.png</file>
     </qresource>
 </RCC>

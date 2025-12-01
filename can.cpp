@@ -154,8 +154,9 @@ tMuxStatus CAN::envoieMsgPeriodique(unsigned long ident)
             msg.bData[5] = 0xFF;
         }
 
-        // ABS_DEF individuel : bit 5 de l’octet 3
+
         if (abs)         oct3 |= 0x20;
+        if (airBag)      oct3 |= 0x08;
         if(secPassDef)   oct4 |= 0x10;
 
         msg.bData[0] = oct0;
@@ -496,4 +497,9 @@ void CAN::setESPI(bool on){
 
 void CAN::setSecPassDef(bool on){
     secPassDef = on;
+}
+
+
+void CAN::setAirBag(bool on){
+    airBag = on;
 }

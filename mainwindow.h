@@ -59,6 +59,7 @@ private slots:
     void on_AlerteHuile_clicked();
     void on_esp_clicked();
     void on_secPassDef_clicked();
+    void on_AirBag_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -86,5 +87,6 @@ private:
     bool m_alerteHuile = false;
     bool m_esp = false;
     bool m_secPassDef = false;
+    bool m_airBag = false;
 };
 #endif // MAINWINDOW_H
