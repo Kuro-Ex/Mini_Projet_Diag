@@ -161,20 +161,47 @@ tMuxStatus CAN::envoieMsgPeriodique(unsigned long ident)
         // ---------- 0x128 : voyants + BVA + modes ----------
     case 0x128:
     {
+        // Par défaut tout à 0 (voyants éteints)
+        msg.bData[0] = 0x00;
+        msg.bData[1] = 0x00;
+        msg.bData[2] = 0x00;
+        msg.bData[3] = 0x00;
+
+        unsigned char feux = 0x00;     // Octet 4
+
         if (voyantsOn) {
-            // Tous les voyants allumés
-            msg.bData[0] = 0xE0;  // FRPK / AL_essence / Pre_chauff
-            msg.bData[1] = 0xE0;  // Service / Stop / ABS
-            msg.bData[2] = 0xE0;  // ESPI / ESRA / WARNING
-            msg.bData[3] = 0x01;  // pied frein
-            msg.bData[4] = 0x7F;  // tous feux
-        } else {
-            msg.bData[0] = 0x00;
-            msg.bData[1] = 0x00;
-            msg.bData[2] = 0x00;
-            msg.bData[3] = 0x00;
-            msg.bData[4] = 0x00;
+            // si tu veux garder ton bouton "tous voyants"
+            msg.bData[0] = 0xE0;      // FRPK / AL_essence / Pre_chauff
+            msg.bData[1] = 0xE0;      // Service / Stop / ABS
+            msg.bData[2] = 0xE0;      // ESPI / ESRA / WARNING
+            msg.bData[3] = 0xE0;      // pied frein
+            feux |= 0x7C;             // ex : tous les feux sauf clignos (bits 2 et 1)
         }
+
+        // --- voyants individuels ---
+        if (clignoGauche) {
+            feux |= 0x02;
+        }
+        if (clignoDroite) {
+            feux |= 0x04;
+        }
+        if (feuxBrouilAR){
+            feux |= 0x08;
+        }
+        if (feuxBrouilAV){
+            feux |= 0x10;
+        }
+        if (feuxRoute){
+            feux |= 0x20;
+        }
+        if (feuxCrois){
+            feux |= 0x40;
+        }
+        if (feuxPos){
+            feux |= 0x80;
+        }
+
+        msg.bData[4] = feux;
 
         // Octet 5 : combine actif
         msg.bData[5] = 0x80;
@@ -405,4 +432,37 @@ void CAN::setLuminosite(int value)
     if (value < 0)  value = 0;
     if (value > 15) value = 15;
     luminosite = value;
+}
+
+void CAN::setClignoGauche(bool on)
+{
+    clignoGauche = on;
+}
+
+void CAN::setClignoDroite(bool on)
+{
+    clignoDroite = on;
+}
+
+void CAN::setfeuxBrouilAR(bool on)
+{
+    feuxBrouilAR = on;
+}
+void CAN::setfeuxBrouilAV(bool on)
+{
+    feuxBrouilAV = on;
+}
+void CAN::setfeuxRoute(bool on)
+{
+    feuxRoute = on;
+}
+
+void CAN::setfeuxCrois(bool on)
+{
+    feuxCrois = on;
+}
+
+void CAN::setfeuxPos(bool on)
+{
+    feuxPos = on;
 }

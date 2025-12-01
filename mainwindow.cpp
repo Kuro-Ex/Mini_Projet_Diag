@@ -21,6 +21,10 @@ MainWindow::MainWindow(QWidget *parent)
     timermsg   = new QTimer(this);
     timerTrames = new QTimer(this);
 
+    // état initial : cligno éteint
+    m_clignoGaucheOn = false;
+
+
     ui->listView->setModel(modelCan);
 
     connect(timermsg,   &QTimer::timeout, this, &MainWindow::recevoir);
@@ -131,8 +135,7 @@ void MainWindow::on_connection_clicked()
     // --- Ouvrir la nouvelle carte ---
     tMuxStatus status = mux->ouvrirComCarte();
     if (status != STATUS_OK) {
-        QMessageBox::critical(this, "Erreur",
-                              QString("Impossible d'ouvrir la carte %1 (code %2)").arg(indexCarte).arg(status));
+        QMessageBox::critical(this, "Erreur",QString("Impossible d'ouvrir la carte %1 (code %2)").arg(indexCarte).arg(status));
         return;
     }
 
@@ -203,7 +206,7 @@ void MainWindow::on_EnvoyerTrames_clicked()
     }
 
     indexTrame = 0;          // recommence à la première trame
-    timerTrames->start(100); // 100 ms entre chaque trame
+    timerTrames->start(100);
 
     ui->informationTrames->setText("Envoi périodique des 6 trames PSA...");
 }
@@ -313,3 +316,117 @@ void MainWindow::on_sliderLuminosite_valueChanged(int value)
     if (!can) return;
     can->setLuminosite(value);
 }
+
+void MainWindow::on_clignotantGauche_clicked()
+{
+    // on inverse l'état
+    m_clignoGaucheOn = !m_clignoGaucheOn;
+
+    // on met la bonne icône
+    if (m_clignoGaucheOn) {
+        ui->clignotantGauche->setIcon(QIcon(":/img/build/cliggOn.png"));
+    } else {
+        ui->clignotantGauche->setIcon(QIcon(":/img/build/cliggOff.png"));
+    }
+
+    // on informe la couche CAN
+    if (can) {
+        can->setClignoGauche(m_clignoGaucheOn);
+    }
+}
+
+
+void MainWindow::on_clignotantDroite_clicked()
+{
+    // on inverse l'état
+    m_clignoDroiteOn = !m_clignoDroiteOn;
+
+    // on met la bonne icône
+    if (m_clignoDroiteOn) {
+        ui->clignotantDroite->setIcon(QIcon(":/img/build/cligdOn.png"));
+    } else {
+        ui->clignotantDroite->setIcon(QIcon(":/img/build/cligd.png"));
+    }
+
+    // on informe la couche CAN
+    if (can) {
+        can->setClignoDroite(m_clignoDroiteOn);
+    }
+}
+
+
+void MainWindow::on_feuxBrouillardAr_clicked()
+{
+    // on inverse l'état
+    m_brouilAr = !m_brouilAr;
+
+    // on met la bonne icône
+    if (m_brouilAr) {
+        ui->feuxBrouillardAr->setIcon(QIcon(":/img/build/FeuxBrouillardAROn.png"));
+    } else {
+        ui->feuxBrouillardAr->setIcon(QIcon(":/img/build/FeuxBrouillardAROff.png"));
+    }
+
+    // on informe la couche CAN
+    if (can) {
+        can->setfeuxBrouilAR(m_brouilAr);
+    }
+}
+
+
+void MainWindow::on_feuxBrouillardAv_clicked()
+{
+    // on inverse l'état
+    m_brouilAv = !m_brouilAv;
+
+    // on met la bonne icône
+    if (m_brouilAv) {
+        ui->feuxBrouillardAv->setIcon(QIcon(":/img/build/feuxBrouillardAVOn.png"));
+    } else {
+        ui->feuxBrouillardAv->setIcon(QIcon(":/img/build/FeuxCroisementOff.png"));
+    }
+
+    // on informe la couche CAN
+    if (can) {
+        can->setfeuxBrouilAV(m_brouilAv);
+    }
+}
+
+
+void MainWindow::on_feuxCroisement_clicked()
+{
+    // on inverse l'état
+    m_Crois = !m_Crois;
+
+    // on met la bonne icône
+    if (m_Crois) {
+        ui->feuxCroisement->setIcon(QIcon(":/img/build/FeuxCroisementOn.png"));
+    } else {
+        ui->feuxCroisement->setIcon(QIcon(":/img/build/FeuxCroisementOff.png"));
+    }
+
+    // on informe la couche CAN
+    if (can) {
+        can->setfeuxCrois(m_Crois);
+    }
+}
+
+
+void MainWindow::on_feuxDeRoute_clicked()
+{
+    // on inverse l'état
+    m_Route = !m_Route;
+
+    // on met la bonne icône
+    if (m_Route) {
+        ui->feuxDeRoute->setIcon(QIcon(":/img/build/feuxDeRouteOn.png"));
+    } else {
+        ui->feuxDeRoute->setIcon(QIcon(":/img/build/FeuxDeRouteOff.png"));
+    }
+
+    // on informe la couche CAN
+    if (can) {
+        can->setfeuxCrois(m_Route);
+    }
+}
+

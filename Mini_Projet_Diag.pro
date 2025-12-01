@@ -34,5 +34,10 @@ INCLUDEPATH += $$PWD/.
 DEPENDPATH += $$PWD/.
 
 DISTFILES += \
+    //0801327h-ad/rakotoarimanana$/profiles/Téléchargements/cliggOff.png \
+    //0801327h-ad/rakotoarimanana$/profiles/Téléchargements/cliggOn.png \
     MuxDLL.dll \
     MuxDLL.lib
+
+RESOURCES += \
+    resources.qrc

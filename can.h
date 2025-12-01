@@ -33,10 +33,25 @@ public:
     // BVA + modes
     void setRapportBVAIndex(int idx);    // slider états P/R/N/D/2/1
     void setModeConduiteIndex(int idx);  // slider états Normal/Sport/Hiver
+    void setClignoGauche(bool on); //btn clignotant gauche
+    void setClignoDroite(bool on); //btn clignotant droite
+    void setfeuxBrouilAV(bool on);
+    void setfeuxBrouilAR(bool on);
+    void setfeuxRoute(bool on);
+    void setfeuxCrois(bool on);
+    void setfeuxPos(bool on);
 
 private:
          // ---------- ETAT COURANT ----------
     bool voyantsOn = false;
+    bool clignoGauche = false;
+    bool clignoDroite = false;
+    bool feuxBrouilAV = false;
+    bool feuxBrouilAR = false;
+    bool feuxRoute = false;
+    bool feuxCrois = false;
+    bool feuxPos = false;
+
 
     int regimeMoteur = 0;   // tr/min
     int vitesse = 0;        // km/h

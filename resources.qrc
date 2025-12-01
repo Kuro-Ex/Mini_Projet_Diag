@@ -1,0 +1,27 @@
+<RCC>
+    <qresource prefix="/img">
+        <file>build/ABSOff.png</file>
+        <file>build/ABSOn.png</file>
+        <file>build/cligd.png</file>
+        <file>build/cligdOn.png</file>
+        <file>build/cliggOff.png</file>
+        <file>build/ESPOff.png</file>
+        <file>build/ESPON.png</file>
+        <file>build/FeuxBrouillardAROff.png</file>
+        <file>build/FeuxBrouillardAROn.png</file>
+        <file>build/feuxBrouillardAVOff.png</file>
+        <file>build/feuxBrouillardAVOn.png</file>
+        <file>build/FeuxCroisementOff.png</file>
+        <file>build/FeuxCroisementOn.png</file>
+        <file>build/FeuxDeRouteOff.png</file>
+        <file>build/feuxDeRouteOn.png</file>
+        <file>build/stopOff.png</file>
+        <file>build/stopOn.png</file>
+        <file>build/warningOff.png</file>
+        <file>build/warningOn.png</file>
+        <file>build/motDeffOff.png</file>
+        <file>build/motDeffOn.png</file>
+        <file>build/secPassDefOff.png</file>
+        <file>build/cliggOn.png</file>
+    </qresource>
+</RCC>
