@@ -33,6 +33,7 @@ public:
     // BVA + modes
     void setRapportBVAIndex(int idx);    // slider états P/R/N/D/2/1
     void setModeConduiteIndex(int idx);  // slider états Normal/Sport/Hiver
+
     void setClignoGauche(bool on); //btn clignotant gauche
     void setClignoDroite(bool on); //btn clignotant droite
     void setfeuxBrouilAV(bool on);
@@ -46,7 +47,8 @@ public:
     void setAlerteHuile(bool on);
     void setESPI(bool on);
     void setSecPassDef(bool on);
-    void setAirBag(bool on);
+    void setAirBagArr(bool on);
+    void setStop(bool on);
 
 private:
          // ---------- ETAT COURANT ----------
@@ -65,7 +67,8 @@ private:
     bool alerteHuile = false;
     bool espI = false;
     bool secPassDef = false;
-    bool airBag = false;
+    bool airBagArr = false;
+    bool stop = false;
 
     int regimeMoteur = 0;   // tr/min
     int vitesse = 0;        // km/h

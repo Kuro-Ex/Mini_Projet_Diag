@@ -156,7 +156,7 @@ tMuxStatus CAN::envoieMsgPeriodique(unsigned long ident)
 
 
         if (abs)         oct3 |= 0x20;
-        if (airBag)      oct3 |= 0x08;
+        if (airBagArr)   oct4 |= 0x08;
         if(secPassDef)   oct4 |= 0x10;
 
         msg.bData[0] = oct0;
@@ -183,12 +183,12 @@ tMuxStatus CAN::envoieMsgPeriodique(unsigned long ident)
 
         if (voyantsOn) {
             msg.bData[0] = 0xE0;      // FRPK / AL_essence / Pre_chauff
-            msg.bData[1] = 0xE0;      // Service / Stop / ABS
+            msg.bData[1] = 0xFF;      // Service / Stop / ABS
             msg.bData[3] = 0xE0;      // pied frein
 
             oct1 |= 0xE0;
             // tous les feux
-            oct4 |= 0x7C;
+            oct4 |= 0xFF;
         }
 
         // --- voyants individuels ---
@@ -196,6 +196,7 @@ tMuxStatus CAN::envoieMsgPeriodique(unsigned long ident)
         if(alerteHuile)   oct0 |= 0x10;
 
         if (service)      oct1 |= 0x80;
+        if (stop)         oct1 |= 0x40;
 
         if(espI)          oct2 |= 0x10;
 
@@ -216,23 +217,29 @@ tMuxStatus CAN::envoieMsgPeriodique(unsigned long ident)
         // --- BVA : octet 6 ---
         unsigned char rapVal = 0;
         switch (rapportBVA) {
-        case 0: rapVal = 0; break;  // P
-        case 1: rapVal = 1; break;  // R
-        case 2: rapVal = 2; break;  // N
-        case 3: rapVal = 3; break;  // D
-        case 4: rapVal = 8; break;  // 2nd
-        case 5: rapVal = 9; break;  // 1er
-        default: rapVal = 0; break;
+        case 0: rapVal = 0x00; break;  // P
+        case 1: rapVal = 0x10; break;  // R
+        case 2: rapVal = 0x20; break;  // N
+        case 3: rapVal = 0x30; break;  // D
+        case 4: rapVal = 0x90; break;  // 1er
+        case 5: rapVal = 0x80; break;  // 2nd
+        case 6: rapVal = 0x70; break;  // 3eme
+        case 7: rapVal = 0x60; break;  // 4eme
+        case 8: rapVal = 0x50; break;  // 5eme
+        case 9: rapVal = 0x40; break;  // 6eme
+        default: rapVal = 0x00; break;
         }
         msg.bData[6] = rapVal;
 
         // --- Mode conduite : octet 7 ---
         unsigned char modeVal = 0;
         switch (modeConduite) {
-        case 0: modeVal = 0; break; // auto normal
-        case 1: modeVal = 1; break; // auto + sport
-        case 2: modeVal = 6; break; // auto + neige
-        default: modeVal = 0; break;
+        case 0: modeVal = 0x00; break; // auto normal
+        case 1: modeVal = 0x20; break; // auto + sport
+        case 2: modeVal = 0x40; break; // séquenciel
+        case 3: modeVal = 0x50; break; // séquenciel + sport
+        case 4: modeVal = 0x60; break; // auto + neige
+        default: modeVal = 0x00; break;
         }
         msg.bData[7] = modeVal;
         break;
@@ -423,14 +430,14 @@ void CAN::setTempEau(int degC)
 void CAN::setRapportBVAIndex(int idx)
 {
     if (idx < 0) idx = 0;
-    if (idx > 5) idx = 5;
+    if (idx > 10) idx = 10;
     rapportBVA = idx;
 }
 
 void CAN::setModeConduiteIndex(int idx)
 {
     if (idx < 0) idx = 0;
-    if (idx > 2) idx = 2;
+    if (idx > 5) idx = 5;
     modeConduite = idx;
 }
 
@@ -500,6 +507,10 @@ void CAN::setSecPassDef(bool on){
 }
 
 
-void CAN::setAirBag(bool on){
-    airBag = on;
+void CAN::setAirBagArr(bool on){
+    airBagArr = on;
+}
+
+void CAN::setStop(bool on){
+    stop = on;
 }

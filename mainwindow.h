@@ -3,6 +3,7 @@
 
 #include "mux.h"
 #include "can.h"
+#include "tcpsocketclient.h"
 
 #include <QMainWindow>
 #include <QDebug>
@@ -59,7 +60,11 @@ private slots:
     void on_AlerteHuile_clicked();
     void on_esp_clicked();
     void on_secPassDef_clicked();
-    void on_AirBag_clicked();
+    void on_AirBagArr_clicked();
+
+    void on_tcp_clicked();
+
+    void on_stop_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -87,6 +92,10 @@ private:
     bool m_alerteHuile = false;
     bool m_esp = false;
     bool m_secPassDef = false;
-    bool m_airBag = false;
+    bool m_stop = false;
+    bool m_airBagArr = false;
+
+    TCPSocketClient *tcpClient;
+
 };
 #endif // MAINWINDOW_H

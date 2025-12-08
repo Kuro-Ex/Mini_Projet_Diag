@@ -14,12 +14,13 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    mux = new Mux(); //initialisation de la classe mux
-    can = new CAN(mux);
-
-    modelCan   = new QStandardItemModel(this);
-    timermsg   = new QTimer(this);
-    timerTrames = new QTimer(this);
+    this->setWindowTitle(QString::fromUtf8("T.E.T.O – Testeur Électronique de Tableau de bord Opérationnel"));
+    mux             = new Mux();
+    can             = new CAN(mux);
+    modelCan        = new QStandardItemModel(this);
+    timermsg        = new QTimer(this);
+    timerTrames     = new QTimer(this);
+    tcpClient       = new TCPSocketClient();
 
     ui->listView->setModel(modelCan);
 
@@ -159,11 +160,12 @@ void MainWindow::on_connection_clicked()
         qDebug() << "Erreur récupération infos carte:" << infoStatus;
     }
 
-    // --- Affichage dans le label "information" ---
-    ui->information->setText(
-        QString("Carte connectée : %1\nN° de série : %2")
-            .arg(cardName, serialNumber)
-        );
+    QString infoText = QString("Carte connectée : %1\nN° de série : %2")
+                           .arg(cardName)
+                           .arg(serialNumber);
+
+    ui->information->setText(infoText);
+
 
     // Affichage du mode MUX configuré (log seulement)
     qDebug() << "Mode MUX:" << mux->hMuxConfigMode.eMuxMode
@@ -203,14 +205,11 @@ void MainWindow::on_EnvoyerTrames_clicked()
 
     indexTrame = 0;          // recommence à la première trame
     timerTrames->start(100);
-
-    ui->informationTrames->setText("Envoi périodique des 6 trames PSA...");
 }
 
 void MainWindow::on_StopTrames_clicked()
 {
     timerTrames->stop();
-    ui->informationTrames->setText("Envoi des trames arrêté.");
 }
 
 // --- envoie périodique des trames ---
@@ -221,18 +220,8 @@ void MainWindow::envoyerTrameSuivante()
 
     unsigned long ident = tramesPSA[indexTrame];
     indexTrame++;
+    can->envoieMsgPeriodique(ident);
 
-    tMuxStatus st = can->envoieMsgPeriodique(ident);
-
-    if (st != STATUS_OK) {
-        ui->informationTrames->setText(
-            QString("Erreur sur trame 0x%1").arg(ident, 0, 16).toUpper()
-            );
-    } else {
-        ui->informationTrames->setText(
-            QString("Envoi trame 0x%1").arg(ident, 0, 16).toUpper()
-            );
-    }
 }
 
 // --- reception des messages ---
@@ -256,7 +245,6 @@ void MainWindow::on_btnVoyantsOn_clicked()
         return;
 
     can->setVoyantsAll(true);
-    ui->informationTrames->setText("Tous les voyants : ON");
 }
 
 void MainWindow::on_btnVoyantsOff_clicked()
@@ -265,7 +253,6 @@ void MainWindow::on_btnVoyantsOff_clicked()
         return;
 
     can->setVoyantsAll(false);
-    ui->informationTrames->setText("Tous les voyants : OFF");
 }
 
 void MainWindow::on_sliderRegime_valueChanged(int value)
@@ -292,20 +279,53 @@ void MainWindow::on_sliderEssence_valueChanged(int value)
 void MainWindow::on_sliderTempEau_valueChanged(int value)
 {
     if (!can) return;
-    can->setTempEau(value);        // -40..120 par ex.
+    can->setTempEau(value);        //0..210°C
+    ui->labelTempEau->setText(QString("TempEau : %1 °C").arg(value));
 }
 
 void MainWindow::on_sliderRapportBVA_valueChanged(int value)
 {
     if (!can) return;
-    can->setRapportBVAIndex(value); // 0..5
+    can->setRapportBVAIndex(value); // 0..9
+
+    QString rapportTxt;
+
+    switch (value) {
+    case 0: rapportTxt = "P";      break;
+    case 1: rapportTxt = "R";      break;
+    case 2: rapportTxt = "N";      break;
+    case 3: rapportTxt = "D";      break;
+    case 4: rapportTxt = "1ère";   break;
+    case 5: rapportTxt = "2nde";   break;
+    case 6: rapportTxt = "3ème";   break;
+    case 7: rapportTxt = "4ème";   break;
+    case 8: rapportTxt = "5ème";   break;
+    case 9: rapportTxt = "6ème";   break;
+    default: rapportTxt = "?";     break;
+    }
+
+    ui->labelRapportBVA->setText("Rapport : " + rapportTxt);
 }
 
 void MainWindow::on_sliderModeBVA_valueChanged(int value)
 {
     if (!can) return;
-    can->setModeConduiteIndex(value); // 0..2
+    can->setModeConduiteIndex(value); // 0..4
+
+    QString modeTxt;
+
+    switch (value) {
+    case 0: modeTxt = "Auto";                break;
+    case 1: modeTxt = "Auto + Sport";        break;
+    case 2: modeTxt = "Séquentiel";          break;
+    case 3: modeTxt = "Séquentiel + Sport";  break;
+    case 4: modeTxt = "Auto + Neige";        break;
+    default: modeTxt = "?";                  break;
+    }
+
+    ui->labelModeBVA->setText("Mode : " + modeTxt);
 }
+
 
 void MainWindow::on_sliderLuminosite_valueChanged(int value)
 {
@@ -530,21 +550,60 @@ void MainWindow::on_secPassDef_clicked()
     }
 }
 
-void MainWindow::on_AirBag_clicked()
+void MainWindow::on_tcp_clicked()
+{
+    if (!tcpClient) return;
+
+    if (!tcpClient->connecter()) {
+        QMessageBox::warning(this, "TCP", "Connexion TCP échouée");
+        return;
+    }
+
+    char msg[] = "test envoie";
+
+    long sent = tcpClient->writeData(msg, strlen(msg));
+
+    if (sent <= 0) {
+        QMessageBox::warning(this, "TCP", "Erreur lors de l'envoi du message");
+    } else {
+        qDebug() << "Message TCP envoyé :" << msg << " (" << sent << " octets)";
+    }
+}
+
+void MainWindow::on_AirBagArr_clicked()
 {
     // on inverse l'état
-    m_airBag = !m_airBag;
+    m_airBagArr = !m_airBagArr;
 
-    /* on met la bonne icône
-    if (m_airBag) {
-        ui->AirBag->setIcon(QIcon(":/img/build/motDeffOn.png"));
+    // on met la bonne icône
+    if (m_airBagArr) {
+        ui->AirBagArr->setIcon(QIcon(":/img/build/airbagOn.png"));
     } else {
-        ui->AirBag->setIcon(QIcon(":/img/build/motDeffOff.png"));
-    }*/
+        ui->AirBagArr->setIcon(QIcon(":/img/build/airbagOff.png"));
+    }
 
     // on informe la couche CAN
     if (can) {
-        can->setAirBag(m_airBag);
+        can->setAirBagArr(m_airBagArr);
+    }
+}
+
+
+void MainWindow::on_stop_clicked()
+{
+    // on inverse l'état
+    m_stop = !m_stop;
+
+    // on met la bonne icône
+    if (m_stop) {
+        ui->stop->setIcon(QIcon(":/img/build/stopOn.png"));
+    } else {
+        ui->stop->setIcon(QIcon(":/img/build/stopOff.png"));
+    }
+
+    // on informe la couche CAN
+    if (can) {
+        can->setStop(m_stop);
     }
 }
 

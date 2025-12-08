@@ -3,6 +3,8 @@ QT       += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++17
+LIBS   += -lws2_32
+
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -10,15 +12,20 @@ CONFIG += c++17
 
 SOURCES += \
     can.cpp \
+    datagramsocketclient.cpp \
     main.cpp \
     mainwindow.cpp \
-    mux.cpp
+    mux.cpp \
+    tcpsocketclient.cpp
 
 HEADERS += \
     can.h \
+    canframe.h \
+    datagramsocketclient.h \
     mainwindow.h \
     mux.h \
-    refmux.h
+    refmux.h \
+    tcpsocketclient.h
 
 FORMS += \
     mainwindow.ui
