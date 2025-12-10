@@ -48,3 +48,9 @@ DISTFILES += \
 
 RESOURCES += \
     resources.qrc
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../release/ -lMuxDLL
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../debug/ -lMuxDLL
+
+INCLUDEPATH += $$PWD/.
+DEPENDPATH += $$PWD/.

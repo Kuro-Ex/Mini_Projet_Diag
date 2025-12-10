@@ -22,10 +22,17 @@ MainWindow::MainWindow(QWidget *parent)
     timerTrames     = new QTimer(this);
     tcpClient       = new TCPSocketClient();
 
+    m_remoteMode    = false;
+
     ui->listView->setModel(modelCan);
 
     connect(timermsg,   &QTimer::timeout, this, &MainWindow::recevoir);
     connect(timerTrames,&QTimer::timeout, this, &MainWindow::envoyerTrameSuivante);
+
+    // Mode par défaut : local
+    m_modeConnexion = ModeConnexion::Local;
+    if (ui->radioLocal)
+        ui->radioLocal->setChecked(true);
 
     // Chargement dynamique de la bibliothèque MuxDLL
     QLibrary *lib = new QLibrary("MuxDLL");
@@ -220,8 +227,52 @@ void MainWindow::envoyerTrameSuivante()
 
     unsigned long ident = tramesPSA[indexTrame];
     indexTrame++;
-    can->envoieMsgPeriodique(ident);
 
+    if (!can) return;
+
+    if (m_modeConnexion == ModeConnexion::Local) {
+        // Envoi sur le bus CAN physique
+        can->envoieMsgPeriodique(ident);
+    } else {
+        // Envoi au tableau de bord distant via TCP
+        envoyerTrameTCP(ident);
+    }
+}
+
+
+void MainWindow::envoyerTrameTCP(unsigned long ident)
+{
+    if (!tcpClient) return;
+
+    // Assure que la connexion est établie
+    if (!tcpClient->connecter()) {
+        QMessageBox::warning(this, "TCP", "Connexion TCP échouée");
+        // on repasse en local pour ne pas rester dans un état incohérent
+        m_modeConnexion = ModeConnexion::Local;
+        if (ui->radioLocal) ui->radioLocal->setChecked(true);
+        return;
+    }
+
+    if (!can) return;
+
+    can_frame frame{};
+    if (!can->buildFrame(ident, frame)) {
+        qDebug() << "[TCP] ID non géré pour buildFrame :"
+                 << QString("0x%1").arg(ident, 0, 16);
+        return;
+    }
+
+    long sent = tcpClient->writeData(&frame, sizeof(frame));
+    if (sent != sizeof(frame)) {
+        QMessageBox::warning(this, "TCP", "Erreur lors de l'envoi de la trame TCP");
+        qDebug() << "[TCP] Erreur envoi ID"
+                 << QString("0x%1").arg(ident, 0, 16)
+                 << "sent =" << sent;
+    } else {
+        qDebug() << "[TCP] Trame envoyée ID"
+                 << QString("0x%1").arg(ident, 0, 16)
+                 << " (" << sent << " octets)";
+    }
 }
 
 // --- reception des messages ---
@@ -550,26 +601,6 @@ void MainWindow::on_secPassDef_clicked()
     }
 }
 
-void MainWindow::on_tcp_clicked()
-{
-    if (!tcpClient) return;
-
-    if (!tcpClient->connecter()) {
-        QMessageBox::warning(this, "TCP", "Connexion TCP échouée");
-        return;
-    }
-
-    char msg[] = "test envoie";
-
-    long sent = tcpClient->writeData(msg, strlen(msg));
-
-    if (sent <= 0) {
-        QMessageBox::warning(this, "TCP", "Erreur lors de l'envoi du message");
-    } else {
-        qDebug() << "Message TCP envoyé :" << msg << " (" << sent << " octets)";
-    }
-}
-
 void MainWindow::on_AirBagArr_clicked()
 {
     // on inverse l'état
@@ -577,9 +608,9 @@ void MainWindow::on_AirBagArr_clicked()
 
     // on met la bonne icône
     if (m_airBagArr) {
-        ui->AirBagArr->setIcon(QIcon(":/img/build/airbagOn.png"));
+        ui->AirBagArr->setIcon(QIcon(":/img/build/airbagArrOn.png"));
     } else {
-        ui->AirBagArr->setIcon(QIcon(":/img/build/airbagOff.png"));
+        ui->AirBagArr->setIcon(QIcon(":/img/build/airbagArrOff.png"));
     }
 
     // on informe la couche CAN
@@ -588,7 +619,23 @@ void MainWindow::on_AirBagArr_clicked()
     }
 }
 
+void MainWindow::on_AirBag_clicked()
+{
+    // on inverse l'état
+    m_airBag = !m_airBag;
 
+    // on met la bonne icône
+    if (m_airBag) {
+        ui->AirBag->setIcon(QIcon(":/img/build/airbagOn.png"));
+    } else {
+        ui->AirBag->setIcon(QIcon(":/img/build/airbagOff.png"));
+    }
+
+    // on informe la couche CAN
+    if (can) {
+        can->setAirBag(m_airBag);
+    }
+}
 void MainWindow::on_stop_clicked()
 {
     // on inverse l'état
@@ -607,3 +654,29 @@ void MainWindow::on_stop_clicked()
     }
 }
 
+void MainWindow::on_radioLocal_toggled(bool checked)
+{
+    if (!checked) return;
+    m_modeConnexion = ModeConnexion::Local;
+    qDebug() << "[MODE] Passage en mode LOCAL (bus CAN)";
+}
+
+void MainWindow::on_radioTCP_toggled(bool checked)
+{
+    if (!checked) return;
+
+    if (!tcpClient) {
+        QMessageBox::warning(this, "TCP", "Client TCP non initialisé");
+        ui->radioLocal->setChecked(true);
+        return;
+    }
+
+    if (!tcpClient->connecter()) {
+        QMessageBox::warning(this, "TCP", "Impossible de se connecter au tableau de bord distant.");
+        ui->radioLocal->setChecked(true);
+        return;
+    }
+
+    m_modeConnexion = ModeConnexion::TCP;
+    qDebug() << "[MODE] Passage en mode TCP (distant)";
+}

@@ -10,7 +10,7 @@ TCPSocketClient::TCPSocketClient()
     connected = false;
 
     hostName   = (char*)"172.16.230.208";
-    portNumber = 1600;
+    portNumber = 1500;
 
     memset(&addrSockServer, 0, sizeof(addrSockServer));
     addrSockServer.sin_family      = AF_INET;
@@ -70,7 +70,6 @@ long TCPSocketClient::readData(void *data, long size)
         // le serveur a probablement fermé
         connected = false;
     }
-
     return bytes;
 }
 

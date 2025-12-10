@@ -3,6 +3,8 @@
 
 #include "mux.h"
 #include "refmux.h"
+#include "canframe.h"
+
 #include <QDebug>
 #include <QMessageBox>
 #include <QString>
@@ -18,6 +20,7 @@ public:
     tMuxStatus envoieMsgPeriodique(unsigned long ident);
     void recevoirMsg();
     void recevoirMsg(QStandardItemModel *model);
+    bool buildFrame(unsigned long ident, can_frame &frame);
 
     // ---------- SIMULATION : SETTERS ----------
     // Voyants du combiné
@@ -48,6 +51,7 @@ public:
     void setESPI(bool on);
     void setSecPassDef(bool on);
     void setAirBagArr(bool on);
+    void setAirBag(bool on);
     void setStop(bool on);
 
 private:
@@ -68,6 +72,7 @@ private:
     bool espI = false;
     bool secPassDef = false;
     bool airBagArr = false;
+    bool airbag = false;
     bool stop = false;
 
     int regimeMoteur = 0;   // tr/min

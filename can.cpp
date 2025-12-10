@@ -77,128 +77,82 @@ tMuxStatus CAN::configurerBus(){
     }
 
     return status;
-
 }
 
-// --- envoie de messages ---
-tMuxStatus CAN::envoieMsgPeriodique(unsigned long ident)
+bool CAN::buildFrame(unsigned long ident, can_frame &frame)
 {
-    tCanMsg msg{};
-    msg.wHandleMsg  = 0;
-    msg.dwIdent     = ident;
-    msg.eTypeId     = CAN_ID_STD;
-    msg.dwMask      = 0x000;
-    msg.eService    = CAN_SVC_TRANSMIT_DATA;
-    msg.lPeriod     = 100;
-    msg.dwReserved1 = 0;
-    msg.dwReserved2 = 0;
-    msg.wDataLen    = 8;
+    frame.can_id  = ident;
+    frame.can_dlc = 8;
+
+    for (int i = 0; i < 8; ++i)
+        frame.data[i] = 0x00;
 
     switch (ident) {
 
-        // ---------- 0x0F6 : clé + T° eau (et autres, mais on s'en sert pour T°) ----------
     case 0x0F6:
     {
+        frame.data[0] = 0xC8;
 
-        msg.bData[0] = 0xC8;
-
-        // Octet 1 : température eau avec offset -40
-        int rawTemp = tempEau + 40;      // Physique = raw - 40
+        int rawTemp = tempEau + 40;
         if (rawTemp < 0)   rawTemp = 0;
         if (rawTemp > 255) rawTemp = 255;
-        msg.bData[1] = static_cast<unsigned char>(rawTemp);
-
-        msg.bData[2] = 0x00;
-        msg.bData[3] = 0x00;
-        msg.bData[4] = 0x00;
-        msg.bData[5] = 0x00;
-        msg.bData[6] = 0x00;
-        msg.bData[7] = 0x00;
+        frame.data[1] = static_cast<unsigned char>(rawTemp);
         break;
     }
 
-        // ---------- 0x036 : luminosite ----------
     case 0x036:
     {
-        msg.bData[0] = 0x00;
-        msg.bData[1] = 0x00;
-        msg.bData[2] = 0x00;
-
-        // Octet 3 : 0x3?  où ? = luminosité (0..15)
         unsigned char lum = static_cast<unsigned char>(luminosite & 0x0F);
-        msg.bData[3] = static_cast<unsigned char>(0x30 | lum);
-        // 0x30 = haut nibble de 0x3D -> on garde jour/nuit/config comme ta valeur initiale
-
-        msg.bData[4] = 0x01;   // mode normal comme dans ton code d’origine
-        msg.bData[5] = 0x00;
-        msg.bData[6] = 0x00;
-        msg.bData[7] = 0x00;
+        frame.data[3] = static_cast<unsigned char>(0x30 | lum);
+        frame.data[4] = 0x01;
         break;
     }
 
-        // ---------- 0x168 : voyants d’alertes ----------
     case 0x168:
     {
-        for (int i = 0; i < 8; ++i) {
-            msg.bData[i] = 0x00;
-        }
-
-        unsigned char oct0 = 0x00;   // Alerte T huile / T eau
-        unsigned char oct3 = 0x00;   // REF_DEF, DSup_DEF, ABS_DEF, ...
+        unsigned char oct0 = 0x00;
+        unsigned char oct3 = 0x00;
         unsigned char oct4 = 0x00;
 
         if (voyantsOn) {
-            oct0              |= 0x03;    // T huile + T eau ON
-            oct3              |= 0xFF;
-            msg.bData[4] = 0xFF;
-            msg.bData[5] = 0xFF;
+            oct0           |= 0x03;
+            oct3           |= 0xFF;
+            frame.data[4]  = 0xEF;
+            frame.data[5]  = 0xFF;
         }
 
+        if (abs)        oct3 |= 0x20;
+        if (airbag)     oct4 |= 0x20;
+        if (secPassDef) oct4 |= 0x10;
 
-        if (abs)         oct3 |= 0x20;
-        if (airBagArr)   oct4 |= 0x08;
-        if(secPassDef)   oct4 |= 0x10;
-
-        msg.bData[0] = oct0;
-        msg.bData[3] = oct3;
-        msg.bData[4] = oct4;
+        frame.data[0] = oct0;
+        frame.data[3] = oct3;
+        frame.data[4] = oct4;
         break;
     }
 
-
-        // ---------- 0x128 : voyants + BVA + modes ----------
     case 0x128:
     {
-
-        msg.bData[0] = 0x00;
-        msg.bData[1] = 0x00;
-        msg.bData[2] = 0x00;
-        msg.bData[3] = 0x00;
-
-        unsigned char oct4 = 0x00;
+        unsigned char oct0 = 0x00;
         unsigned char oct1 = 0x00;
         unsigned char oct2 = 0x00;
-        unsigned char oct0 = 0x00;
-
+        unsigned char oct4 = 0x00;
 
         if (voyantsOn) {
-            msg.bData[0] = 0xE0;      // FRPK / AL_essence / Pre_chauff
-            msg.bData[1] = 0xFF;      // Service / Stop / ABS
-            msg.bData[3] = 0xE0;      // pied frein
-
-            oct1 |= 0xE0;
-            // tous les feux
-            oct4 |= 0xFF;
+            oct0 = 0xE0;
+            oct1 = 0xFF;
+            frame.data[3] = 0xE0;
+            oct4 = 0xFF;
         }
 
-        // --- voyants individuels ---
-        if (frpk)         oct0 |= 0x20;
-        if(alerteHuile)   oct0 |= 0x10;
+        if (frpk)        oct0 |= 0x20;
+        if (alerteHuile) oct0 |= 0x10;
+        if (airBagArr)   oct0 |= 0x80;
 
-        if (service)      oct1 |= 0x80;
-        if (stop)         oct1 |= 0x40;
+        if (service)     oct1 |= 0x80;
+        if (stop)        oct1 |= 0x40;
 
-        if(espI)          oct2 |= 0x10;
+        if (espI)        oct2 |= 0x10;
 
         if (clignoGauche) oct4 |= 0x02;
         if (clignoDroite) oct4 |= 0x04;
@@ -208,83 +162,94 @@ tMuxStatus CAN::envoieMsgPeriodique(unsigned long ident)
         if (feuxCrois)    oct4 |= 0x40;
         if (feuxPos)      oct4 |= 0x80;
 
-        msg.bData[0] = oct0;
-        msg.bData[1] = oct1;
-        msg.bData[2] = oct2;
-        msg.bData[4] = oct4;
-        msg.bData[5] = 0x80;
+        frame.data[0] = oct0;
+        frame.data[1] = oct1;
+        frame.data[2] = oct2;
+        frame.data[4] = oct4;
+        frame.data[5] = 0x80;
 
-        // --- BVA : octet 6 ---
         unsigned char rapVal = 0;
         switch (rapportBVA) {
-        case 0: rapVal = 0x00; break;  // P
-        case 1: rapVal = 0x10; break;  // R
-        case 2: rapVal = 0x20; break;  // N
-        case 3: rapVal = 0x30; break;  // D
-        case 4: rapVal = 0x90; break;  // 1er
-        case 5: rapVal = 0x80; break;  // 2nd
-        case 6: rapVal = 0x70; break;  // 3eme
-        case 7: rapVal = 0x60; break;  // 4eme
-        case 8: rapVal = 0x50; break;  // 5eme
-        case 9: rapVal = 0x40; break;  // 6eme
+        case 0: rapVal = 0x00; break;
+        case 1: rapVal = 0x10; break;
+        case 2: rapVal = 0x20; break;
+        case 3: rapVal = 0x30; break;
+        case 4: rapVal = 0x90; break;
+        case 5: rapVal = 0x80; break;
+        case 6: rapVal = 0x70; break;
+        case 7: rapVal = 0x60; break;
+        case 8: rapVal = 0x50; break;
+        case 9: rapVal = 0x40; break;
         default: rapVal = 0x00; break;
         }
-        msg.bData[6] = rapVal;
+        frame.data[6] = rapVal;
 
-        // --- Mode conduite : octet 7 ---
         unsigned char modeVal = 0;
         switch (modeConduite) {
-        case 0: modeVal = 0x00; break; // auto normal
-        case 1: modeVal = 0x20; break; // auto + sport
-        case 2: modeVal = 0x40; break; // séquenciel
-        case 3: modeVal = 0x50; break; // séquenciel + sport
-        case 4: modeVal = 0x60; break; // auto + neige
+        case 0: modeVal = 0x00; break;
+        case 1: modeVal = 0x20; break;
+        case 2: modeVal = 0x40; break;
+        case 3: modeVal = 0x50; break;
+        case 4: modeVal = 0x60; break;
         default: modeVal = 0x00; break;
         }
-        msg.bData[7] = modeVal;
+        frame.data[7] = modeVal;
         break;
     }
 
-    // ---------- 0x0B6 : micromoteurs compte-tour + vitesse ----------
     case 0x0B6:
     {
-        // régime moteur : Physique = raw * 0.125  -> raw = RPM / 0.125
         unsigned int rawRpm = static_cast<unsigned int>(regimeMoteur / 0.125);
+        frame.data[0] = static_cast<unsigned char>((rawRpm >> 8) & 0xFF);
+        frame.data[1] = static_cast<unsigned char>( rawRpm       & 0xFF);
 
-        msg.bData[0] = static_cast<unsigned char>((rawRpm >> 8) & 0xFF);
-        msg.bData[1] = static_cast<unsigned char>( rawRpm        & 0xFF);
-
-        // vitesse véhicule : Physique = raw * 0.01 -> raw = km/h / 0.01
         unsigned int rawV = static_cast<unsigned int>(vitesse / 0.01);
-        msg.bData[2] = static_cast<unsigned char>((rawV >> 8) & 0xFF);
-        msg.bData[3] = static_cast<unsigned char>( rawV       & 0xFF);
-
-        msg.bData[4] = 0x00;
-        msg.bData[5] = 0x00;
-        msg.bData[6] = 0x00;
-        msg.bData[7] = 0x00;
+        frame.data[2] = static_cast<unsigned char>((rawV >> 8) & 0xFF);
+        frame.data[3] = static_cast<unsigned char>( rawV       & 0xFF);
         break;
     }
 
-
-        // ---------- 0x161 : micromoteur jauge essence ----------
     case 0x161:
-        msg.bData[0] = 0x00;
-        msg.bData[1] = 0x00;
-        msg.bData[2] = 0x00;
-        msg.bData[3] = static_cast<unsigned char>(jaugeEssence); // 0..100 %
-        msg.bData[4] = 0x00;
-        msg.bData[5] = 0x00;
-        msg.bData[6] = 0x00;
-        msg.bData[7] = 0x00;
+    {
+        frame.data[3] = static_cast<unsigned char>(jaugeEssence);
         break;
+    }
 
     default:
+        return false;
+    }
+
+    return true;
+}
+// --- envoie de messages ---
+tMuxStatus CAN::envoieMsgPeriodique(unsigned long ident)
+{
+    if (!mux || !mux->carteOuverte) {
+        QMessageBox::critical(nullptr, "Erreur CAN", "Carte non ouverte !");
+        return STATUS_ERR_NO_DEVICE;
+    }
+
+    can_frame frame{};
+    if (!buildFrame(ident, frame)) {
         QMessageBox::warning(nullptr, "Erreur CAN",
                              QString("ID 0x%1 non géré.").arg(ident, 0, 16).toUpper());
         return STATUS_ERR_PARAM;
     }
 
+    tCanMsg msg{};
+    msg.wHandleMsg  = 0;
+    msg.dwIdent     = frame.can_id;
+    msg.eTypeId     = CAN_ID_STD;
+    msg.dwMask      = 0x000;
+    msg.eService    = CAN_SVC_TRANSMIT_DATA;
+    msg.lPeriod     = 100;
+    msg.dwReserved1 = 0;
+    msg.dwReserved2 = 0;
+    msg.wDataLen    = frame.can_dlc;
+
+    for (int i = 0; i < frame.can_dlc && i < 8; ++i) {
+        msg.bData[i] = frame.data[i];
+    }
 
     tMuxStatus status = CanSendMsg(mux->wCard, mux->hMuxConfigMode.wBusInterface, &msg);
     if (status != STATUS_OK) {
@@ -511,6 +476,9 @@ void CAN::setAirBagArr(bool on){
     airBagArr = on;
 }
 
+void CAN::setAirBag(bool on){
+    airbag = on;
+}
 void CAN::setStop(bool on){
     stop = on;
 }

@@ -29,5 +29,7 @@
         <file>build/AlerteHuileOn.png</file>
         <file>build/airbagOff.png</file>
         <file>build/airbagOn.png</file>
+        <file>build/airbagArrOff.png</file>
+        <file>build/airbagArrOn.png</file>
     </qresource>
 </RCC>

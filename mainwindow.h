@@ -4,6 +4,7 @@
 #include "mux.h"
 #include "can.h"
 #include "tcpsocketclient.h"
+#include "canframe.h"
 
 #include <QMainWindow>
 #include <QDebug>
@@ -43,7 +44,6 @@ private slots:
     void on_sliderVitesse_valueChanged(int value);
     void on_sliderEssence_valueChanged(int value);
     void on_sliderTempEau_valueChanged(int value);
-
     void on_sliderRapportBVA_valueChanged(int value);
     void on_sliderModeBVA_valueChanged(int value);
     void on_sliderLuminosite_valueChanged(int value);
@@ -61,10 +61,12 @@ private slots:
     void on_esp_clicked();
     void on_secPassDef_clicked();
     void on_AirBagArr_clicked();
-
-    void on_tcp_clicked();
-
+    void on_AirBag_clicked();
     void on_stop_clicked();
+
+    void on_radioLocal_toggled(bool checked);
+    void on_radioTCP_toggled(bool checked);
+
 
 private:
     Ui::MainWindow *ui;
@@ -94,8 +96,15 @@ private:
     bool m_secPassDef = false;
     bool m_stop = false;
     bool m_airBagArr = false;
+    bool m_airBag = false;
+    bool m_tcpActif = false;
+    bool m_remoteMode = false;
+
+    enum class ModeConnexion { Local, TCP };
+    ModeConnexion m_modeConnexion = ModeConnexion::Local;
 
     TCPSocketClient *tcpClient;
 
+    void envoyerTrameTCP(unsigned long ident);
 };
 #endif // MAINWINDOW_H
