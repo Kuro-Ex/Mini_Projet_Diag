@@ -15,6 +15,9 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     this->setWindowTitle(QString::fromUtf8("T.E.T.O – Testeur Électronique de Tableau de bord Opérationnel"));
+    this->statusBar()->showMessage("Développé par RAKOTOARIMANANA Enrique");
+    this->setWindowIcon(QIcon(":/img/build/tetoIcon.png"));
+
     mux             = new Mux();
     can             = new CAN(mux);
     modelCan        = new QStandardItemModel(this);

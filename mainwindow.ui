@@ -14,7 +14,53 @@
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: rgb(26, 0, 77);</string>
+   <string notr="true">QMainWindow {
+    background-color: #E9EEF3;
+}
+
+QWidget {
+    background-color: #E9EEF3;
+    color: #1A1A1A;
+}
+
+QGroupBox {
+    background-color: #CFD8E3;
+    border: 1px solid #4A627A;
+    border-radius: 6px;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+QPushButton {
+    background-color: #CFD8E3;
+    color: #1A1A1A;
+    border: 1px solid #4A627A;
+    padding: 6px;
+    border-radius: 6px;
+}
+
+QPushButton:hover {
+    background-color: #4A627A;
+    color: white;
+}
+
+QSlider::groove:horizontal {
+    height: 6px;
+    background: #CFD8E3;
+}
+
+QSlider::handle:horizontal {
+    background: #4A627A;
+    width: 14px;
+    border-radius: 7px;
+}
+
+QStatusBar {
+    background: #CFD8E3;
+    color: #1A1A1A;
+    font-size: 10pt;
+}
+</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QGroupBox" name="groupBox">
@@ -186,7 +232,7 @@ N° de série : </string>
    <widget class="QPushButton" name="btnVoyantsOn">
     <property name="geometry">
      <rect>
-      <x>650</x>
+      <x>660</x>
       <y>490</y>
       <width>80</width>
       <height>31</height>
@@ -792,19 +838,6 @@ N° de série : </string>
      </property>
     </widget>
    </widget>
-   <widget class="QPushButton" name="tcp">
-    <property name="geometry">
-     <rect>
-      <x>900</x>
-      <y>490</y>
-      <width>121</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>PushButton</string>
-    </property>
-   </widget>
    <widget class="QGroupBox" name="groupBox_2">
     <property name="geometry">
      <rect>
@@ -856,7 +889,7 @@ N° de série : </string>
        <x>30</x>
        <y>60</y>
        <width>301</width>
-       <height>71</height>
+       <height>72</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_5">
