@@ -15,50 +15,40 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QMainWindow {
-    background-color: #E9EEF3;
+    background-color: #0D1B2A;
 }
 
 QWidget {
-    background-color: #E9EEF3;
-    color: #1A1A1A;
+    color: #E0E6ED;
+    background-color: #0D1B2A;
 }
 
 QGroupBox {
-    background-color: #CFD8E3;
-    border: 1px solid #4A627A;
-    border-radius: 6px;
+    border: 1px solid #415A77;
     margin-top: 10px;
-    font-weight: bold;
 }
 
 QPushButton {
-    background-color: #CFD8E3;
-    color: #1A1A1A;
-    border: 1px solid #4A627A;
+    background-color: #1B263B;
+    color: #E0E6ED;
+    border: 1px solid #415A77;
     padding: 6px;
     border-radius: 6px;
 }
 
 QPushButton:hover {
-    background-color: #4A627A;
-    color: white;
+    background-color: #415A77;
 }
 
 QSlider::groove:horizontal {
     height: 6px;
-    background: #CFD8E3;
+    background: #415A77;
 }
 
 QSlider::handle:horizontal {
-    background: #4A627A;
+    background: #E0E6ED;
     width: 14px;
     border-radius: 7px;
-}
-
-QStatusBar {
-    background: #CFD8E3;
-    color: #1A1A1A;
-    font-size: 10pt;
 }
 </string>
   </property>
@@ -113,7 +103,7 @@ N° de série : </string>
    <widget class="QLabel" name="nbCartes">
     <property name="geometry">
      <rect>
-      <x>410</x>
+      <x>160</x>
       <y>10</y>
       <width>331</width>
       <height>31</height>
@@ -848,36 +838,36 @@ N° de série : </string>
      </rect>
     </property>
     <property name="title">
-     <string>GroupBox</string>
+     <string>Mode de connexion :</string>
     </property>
     <widget class="QWidget" name="horizontalLayoutWidget_3">
      <property name="geometry">
       <rect>
        <x>30</x>
-       <y>20</y>
+       <y>30</y>
        <width>301</width>
-       <height>41</height>
+       <height>31</height>
       </rect>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_10">
       <item>
        <widget class="QRadioButton" name="radioLocal">
         <property name="text">
-         <string>RadioButton</string>
+         <string>Local</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QRadioButton" name="radioTCP">
         <property name="text">
-         <string>RadioButton</string>
+         <string>TCP</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QRadioButton" name="radioUDP">
         <property name="text">
-         <string>RadioButton</string>
+         <string>UDP</string>
         </property>
        </widget>
       </item>

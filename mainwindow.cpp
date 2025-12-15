@@ -8,6 +8,8 @@
 #include <QDebug>
 #include <QVariant>
 #include <QTimer>
+#include <cstring>
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -24,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
     timermsg        = new QTimer(this);
     timerTrames     = new QTimer(this);
     tcpClient       = new TCPSocketClient();
+    udpClient       = new DatagramSocketClient(1500);
 
     m_remoteMode    = false;
 
@@ -43,7 +46,6 @@ MainWindow::MainWindow(QWidget *parent)
         QMessageBox::critical(this, "Erreur", "Impossible de charger MuxDLL !");
         return;
     }
-
 
     // --- recherche des cartes ---
     tMuxStatus status = mux->rechercherCartes();
@@ -106,6 +108,7 @@ void MainWindow::initialiserComboCartes()
     }
 }
 
+// --- boutton de connexion a la 6c6l ---
 void MainWindow::on_connection_clicked()
 {
     int indexCombo = ui->comboBoxCartes->currentIndex();
@@ -208,12 +211,19 @@ void MainWindow::on_refresh_clicked()
 // --- Envoie des trames ---
 void MainWindow::on_EnvoyerTrames_clicked()
 {
-    if (!mux || !mux->carteOuverte) {
-        QMessageBox::warning(this, "CAN", "Aucune carte ouverte !");
-        return;
+    if (m_modeConnexion == ModeConnexion::Local) {
+        if (!mux || !mux->carteOuverte) {
+            QMessageBox::warning(this, "CAN", "Aucune carte ouverte !");
+            return;
+        }
+    } else {
+        if (!tcpClient || !tcpClient->connecter()) {
+            QMessageBox::warning(this, "TCP", "Connexion TCP impossible !");
+            return;
+        }
     }
 
-    indexTrame = 0;          // recommence à la première trame
+    indexTrame = 0;
     timerTrames->start(100);
 }
 
@@ -226,55 +236,19 @@ void MainWindow::on_StopTrames_clicked()
 void MainWindow::envoyerTrameSuivante()
 {
     if (indexTrame >= tramesPSA.size())
-        indexTrame = 0;  // boucle infinie
+        indexTrame = 0;
 
     unsigned long ident = tramesPSA[indexTrame];
     indexTrame++;
 
     if (!can) return;
 
-    if (m_modeConnexion == ModeConnexion::Local) {
-        // Envoi sur le bus CAN physique
+    if (m_modeConnexion == ModeConnexion::TCP) {
+        sendIdentTCP(ident);
+    } else if (m_modeConnexion == ModeConnexion::UDP) {
+        sendIdentUDP(ident);
+    } else {
         can->envoieMsgPeriodique(ident);
-    } else {
-        // Envoi au tableau de bord distant via TCP
-        envoyerTrameTCP(ident);
-    }
-}
-
-
-void MainWindow::envoyerTrameTCP(unsigned long ident)
-{
-    if (!tcpClient) return;
-
-    // Assure que la connexion est établie
-    if (!tcpClient->connecter()) {
-        QMessageBox::warning(this, "TCP", "Connexion TCP échouée");
-        // on repasse en local pour ne pas rester dans un état incohérent
-        m_modeConnexion = ModeConnexion::Local;
-        if (ui->radioLocal) ui->radioLocal->setChecked(true);
-        return;
-    }
-
-    if (!can) return;
-
-    can_frame frame{};
-    if (!can->buildFrame(ident, frame)) {
-        qDebug() << "[TCP] ID non géré pour buildFrame :"
-                 << QString("0x%1").arg(ident, 0, 16);
-        return;
-    }
-
-    long sent = tcpClient->writeData(&frame, sizeof(frame));
-    if (sent != sizeof(frame)) {
-        QMessageBox::warning(this, "TCP", "Erreur lors de l'envoi de la trame TCP");
-        qDebug() << "[TCP] Erreur envoi ID"
-                 << QString("0x%1").arg(ident, 0, 16)
-                 << "sent =" << sent;
-    } else {
-        qDebug() << "[TCP] Trame envoyée ID"
-                 << QString("0x%1").arg(ident, 0, 16)
-                 << " (" << sent << " octets)";
     }
 }
 
@@ -286,7 +260,6 @@ void MainWindow::recevoir()
 
     can->recevoirMsg(modelCan);
 
-    // Auto-scroll uniquement s'il y a au moins une ligne
     int rowCount = modelCan->rowCount();
     if (rowCount <= 0)
         return;
@@ -295,46 +268,58 @@ void MainWindow::recevoir()
 // --- gestion des btn et sliders pour le tableau de bord ---
 void MainWindow::on_btnVoyantsOn_clicked()
 {
-    if (!can || !mux || !mux->carteOuverte)
-        return;
-
+    if (!can) return;
     can->setVoyantsAll(true);
+
+    if (tcpClient->connecter()|| udpClient){
+    sendIdent(0x168);
+    sendIdent(0x128);
+    }
 }
 
 void MainWindow::on_btnVoyantsOff_clicked()
 {
-    if (!can || !mux || !mux->carteOuverte)
-        return;
-
+    if (!can) return;
     can->setVoyantsAll(false);
+
+    sendIdent(0x168);
+    sendIdent(0x128);
 }
 
 void MainWindow::on_sliderRegime_valueChanged(int value)
 {
     if (!can) return;
-    can->setRegimeMoteur(value);   // 0..8191 tr/min
+    can->setRegimeMoteur(value);
     ui->labelRegime->setText(QString("Régime : %1 tr/min ").arg(value));
+
+    sendIdent(0x0B6);
 }
 
 void MainWindow::on_sliderVitesse_valueChanged(int value)
 {
     if (!can) return;
-    can->setVitesse(value);        // 0..250 km/h
+    can->setVitesse(value);
     ui->labelVitesse->setText(QString("Vitesse : %1 km/h").arg(value));
+
+    sendIdent(0x0B6);
 }
 
 void MainWindow::on_sliderEssence_valueChanged(int value)
 {
     if (!can) return;
-    can->setJaugeEssence(value);   // 0..100 %
+    can->setJaugeEssence(value);
     ui->labelEssence->setText(QString("Essence : %1 %").arg(value));
+
+    sendIdent(0x161);
 }
 
 void MainWindow::on_sliderTempEau_valueChanged(int value)
 {
     if (!can) return;
-    can->setTempEau(value);        //0..210°C
+    can->setTempEau(value);
     ui->labelTempEau->setText(QString("TempEau : %1 °C").arg(value));
+
+    sendIdent(0x0F6);
 }
 
 void MainWindow::on_sliderRapportBVA_valueChanged(int value)
@@ -359,6 +344,7 @@ void MainWindow::on_sliderRapportBVA_valueChanged(int value)
     }
 
     ui->labelRapportBVA->setText("Rapport : " + rapportTxt);
+    sendIdent(0x128);
 }
 
 void MainWindow::on_sliderModeBVA_valueChanged(int value)
@@ -378,6 +364,7 @@ void MainWindow::on_sliderModeBVA_valueChanged(int value)
     }
 
     ui->labelModeBVA->setText("Mode : " + modeTxt);
+    sendIdent(0x128);
 }
 
 
@@ -385,276 +372,191 @@ void MainWindow::on_sliderLuminosite_valueChanged(int value)
 {
     if (!can) return;
     can->setLuminosite(value);
+        ui->labelLuminosite->setText(QString("Luminosité : %1 %").arg(value));
+    sendIdent(0x036);
 }
 
 void MainWindow::on_clignotantGauche_clicked()
 {
-    // on inverse l'état
     m_clignoGaucheOn = !m_clignoGaucheOn;
-
-    // on met la bonne icône
-    if (m_clignoGaucheOn) {
-        ui->clignotantGauche->setIcon(QIcon(":/img/build/cliggOn.png"));
-    } else {
-        ui->clignotantGauche->setIcon(QIcon(":/img/build/cliggOff.png"));
-    }
-
-    // on informe la couche CAN
-    if (can) {
-        can->setClignoGauche(m_clignoGaucheOn);
-    }
+    ui->clignotantGauche->setIcon(QIcon(m_clignoGaucheOn ? ":/img/build/cliggOn.png"
+                                                         : ":/img/build/cliggOff.png"));
+    if (!can) return;
+    can->setClignoGauche(m_clignoGaucheOn);
+    sendIdent(0x128);
 }
 
 void MainWindow::on_clignotantDroite_clicked()
 {
-    // on inverse l'état
     m_clignoDroiteOn = !m_clignoDroiteOn;
-
-    // on met la bonne icône
-    if (m_clignoDroiteOn) {
-        ui->clignotantDroite->setIcon(QIcon(":/img/build/cligdOn.png"));
-    } else {
-        ui->clignotantDroite->setIcon(QIcon(":/img/build/cligd.png"));
-    }
-
-    // on informe la couche CAN
-    if (can) {
-        can->setClignoDroite(m_clignoDroiteOn);
-    }
+    ui->clignotantDroite->setIcon(QIcon(m_clignoDroiteOn ? ":/img/build/cligdOn.png"
+                                                         : ":/img/build/cligd.png"));
+    if (!can) return;
+    can->setClignoDroite(m_clignoDroiteOn);
+    sendIdent(0x128);
 }
 
 void MainWindow::on_feuxBrouillardAr_clicked()
 {
-    // on inverse l'état
     m_brouilAr = !m_brouilAr;
 
-    // on met la bonne icône
-    if (m_brouilAr) {
-        ui->feuxBrouillardAr->setIcon(QIcon(":/img/build/FeuxBrouillardAROn.png"));
-    } else {
-        ui->feuxBrouillardAr->setIcon(QIcon(":/img/build/FeuxBrouillardAROff.png"));
-    }
+    ui->feuxBrouillardAr->setIcon(QIcon(m_brouilAr
+                                            ? ":/img/build/FeuxBrouillardAROn.png"
+                                            : ":/img/build/FeuxBrouillardAROff.png"));
 
-    // on informe la couche CAN
-    if (can) {
-        can->setfeuxBrouilAR(m_brouilAr);
-    }
+    if (!can) return;
+    can->setfeuxBrouilAR(m_brouilAr);
+
+    sendIdent(0x128);
 }
 
 void MainWindow::on_feuxBrouillardAv_clicked()
 {
-    // on inverse l'état
     m_brouilAv = !m_brouilAv;
 
-    // on met la bonne icône
-    if (m_brouilAv) {
-        ui->feuxBrouillardAv->setIcon(QIcon(":/img/build/feuxBrouillardAVOn.png"));
-    } else {
-        ui->feuxBrouillardAv->setIcon(QIcon(":/img/build/FeuxCroisementOff.png"));
-    }
+    ui->feuxBrouillardAv->setIcon(QIcon(m_brouilAv
+                                            ? ":/img/build/feuxBrouillardAVOn.png"
+                                            : ":/img/build/FeuxCroisementOff.png"));
 
-    // on informe la couche CAN
-    if (can) {
-        can->setfeuxBrouilAV(m_brouilAv);
-    }
+    if (!can) return;
+    can->setfeuxBrouilAV(m_brouilAv);
+
+    sendIdent(0x128);
 }
 
 void MainWindow::on_feuxCroisement_clicked()
 {
-    // on inverse l'état
     m_Crois = !m_Crois;
 
-    // on met la bonne icône
-    if (m_Crois) {
-        ui->feuxCroisement->setIcon(QIcon(":/img/build/FeuxCroisementOn.png"));
-    } else {
-        ui->feuxCroisement->setIcon(QIcon(":/img/build/FeuxCroisementOff.png"));
-    }
+    ui->feuxCroisement->setIcon(QIcon(m_Crois
+                                          ? ":/img/build/FeuxCroisementOn.png"
+                                          : ":/img/build/FeuxCroisementOff.png"));
 
-    // on informe la couche CAN
-    if (can) {
-        can->setfeuxCrois(m_Crois);
-    }
+    if (!can) return;
+    can->setfeuxCrois(m_Crois);
+
+    sendIdent(0x128);
 }
 
 void MainWindow::on_feuxDeRoute_clicked()
 {
-    // on inverse l'état
     m_Route = !m_Route;
 
-    // on met la bonne icône
-    if (m_Route) {
-        ui->feuxDeRoute->setIcon(QIcon(":/img/build/feuxDeRouteOn.png"));
-    } else {
-        ui->feuxDeRoute->setIcon(QIcon(":/img/build/FeuxDeRouteOff.png"));
-    }
+    ui->feuxDeRoute->setIcon(QIcon(m_Route
+                                       ? ":/img/build/feuxDeRouteOn.png"
+                                       : ":/img/build/FeuxDeRouteOff.png"));
 
-    // on informe la couche CAN
-    if (can) {
-        can->setfeuxRoute(m_Route);
-    }
+    if (!can) return;
+    can->setfeuxRoute(m_Route);
+
+    sendIdent(0x128);
 }
 
-void MainWindow::on_service_clicked(){
-
-    // on inverse l'état
+void MainWindow::on_service_clicked()
+{
     m_service = !m_service;
-
-    // on met la bonne icône
-    if (m_service) {
-        ui->service->setIcon(QIcon(":/img/build/warningOn.png"));
-    } else {
-        ui->service->setIcon(QIcon(":/img/build/warningOff.png"));
-    }
-
-    // on informe la couche CAN
-    if (can) {
-        can->setService(m_service);
-    }
+    ui->service->setIcon(QIcon(m_service ? ":/img/build/warningOn.png"
+                                         : ":/img/build/warningOff.png"));
+    if (!can) return;
+    can->setService(m_service);
+    sendIdent(0x128);
 }
 
 void MainWindow::on_Frpk_clicked()
 {
-    // on inverse l'état
     m_frpk = !m_frpk;
 
-    // on met la bonne icône
-    if (m_frpk) {
-        ui->Frpk->setIcon(QIcon(":/img/build/frpkOn.png"));
-    } else {
-        ui->Frpk->setIcon(QIcon(":/img/build/frpkOff.png"));
-    }
+    ui->Frpk->setIcon(QIcon(m_frpk
+                                ? ":/img/build/frpkOn.png"
+                                : ":/img/build/frpkOff.png"));
 
-    // on informe la couche CAN
-    if (can) {
-        can->setFrpk(m_frpk);
-    }
+    if (!can) return;
+    can->setFrpk(m_frpk);
+
+    sendIdent(0x128);
 }
 
 void MainWindow::on_abs_clicked()
 {
-    // on inverse l'état
     m_abs = !m_abs;
-
-    // on met la bonne icône
-    if (m_abs) {
-        ui->abs->setIcon(QIcon(":/img/build/ABSOn.png"));
-    } else {
-        ui->abs->setIcon(QIcon(":/img/build/ABSOff.png"));
-    }
-
-    // on informe la couche CAN
-    if (can) {
-        can->setAbs(m_abs);
-    }
+    ui->abs->setIcon(QIcon(m_abs ? ":/img/build/ABSOn.png"
+                                 : ":/img/build/ABSOff.png"));
+    if (!can) return;
+    can->setAbs(m_abs);
+    sendIdent(0x168);
 }
+
 void MainWindow::on_AlerteHuile_clicked()
 {
-    // on inverse l'état
     m_alerteHuile = !m_alerteHuile;
 
-    // on met la bonne icône
-    if (m_alerteHuile) {
-        ui->AlerteHuile->setIcon(QIcon(":/img/build/AlerteHuileOn.png"));
-    } else {
-        ui->AlerteHuile->setIcon(QIcon(":/img/build/AlerteHuile.png"));
-    }
+    ui->AlerteHuile->setIcon(QIcon(m_alerteHuile
+                                       ? ":/img/build/AlerteHuileOn.png"
+                                       : ":/img/build/AlerteHuile.png"));
 
-    // on informe la couche CAN
-    if (can) {
-        can->setAlerteHuile(m_alerteHuile);
-    }
+    if (!can) return;
+    can->setAlerteHuile(m_alerteHuile);
+
+    sendIdent(0x128);
 }
-
 
 void MainWindow::on_esp_clicked()
 {
-    // on inverse l'état
     m_esp = !m_esp;
 
-    // on met la bonne icône
-    if (m_esp) {
-        ui->esp->setIcon(QIcon(":/img/build/ESPON.png"));
-    } else {
-        ui->esp->setIcon(QIcon(":/img/build/ESPOff.png"));
-    }
+    ui->esp->setIcon(QIcon(m_esp
+                               ? ":/img/build/ESPON.png"
+                               : ":/img/build/ESPOff.png"));
 
-    // on informe la couche CAN
-    if (can) {
-        can->setESPI(m_esp);
-    }
+    if (!can) return;
+    can->setESPI(m_esp);
+
+    sendIdent(0x128);
 }
-
 
 void MainWindow::on_secPassDef_clicked()
 {
-    // on inverse l'état
     m_secPassDef = !m_secPassDef;
-
-    // on met la bonne icône
-    if (m_secPassDef) {
-        ui->secPassDef->setIcon(QIcon(":/img/build/motDeffOn.png"));
-    } else {
-        ui->secPassDef->setIcon(QIcon(":/img/build/motDeffOff.png"));
-    }
-
-    // on informe la couche CAN
-    if (can) {
-        can->setSecPassDef(m_secPassDef);
-    }
+    ui->secPassDef->setIcon(QIcon(m_secPassDef ? ":/img/build/motDeffOn.png"
+                                               : ":/img/build/motDeffOff.png"));
+    if (!can) return;
+    can->setSecPassDef(m_secPassDef);
+    sendIdent(0x168);
 }
 
 void MainWindow::on_AirBagArr_clicked()
 {
-    // on inverse l'état
     m_airBagArr = !m_airBagArr;
 
-    // on met la bonne icône
-    if (m_airBagArr) {
-        ui->AirBagArr->setIcon(QIcon(":/img/build/airbagArrOn.png"));
-    } else {
-        ui->AirBagArr->setIcon(QIcon(":/img/build/airbagArrOff.png"));
-    }
+    ui->AirBagArr->setIcon(QIcon(m_airBagArr
+                                     ? ":/img/build/airbagArrOn.png"
+                                     : ":/img/build/airbagArrOff.png"));
 
-    // on informe la couche CAN
-    if (can) {
-        can->setAirBagArr(m_airBagArr);
-    }
+    if (!can) return;
+    can->setAirBagArr(m_airBagArr);
+
+    sendIdent(0x128);
 }
 
 void MainWindow::on_AirBag_clicked()
 {
-    // on inverse l'état
     m_airBag = !m_airBag;
-
-    // on met la bonne icône
-    if (m_airBag) {
-        ui->AirBag->setIcon(QIcon(":/img/build/airbagOn.png"));
-    } else {
-        ui->AirBag->setIcon(QIcon(":/img/build/airbagOff.png"));
-    }
-
-    // on informe la couche CAN
-    if (can) {
-        can->setAirBag(m_airBag);
-    }
+    ui->AirBag->setIcon(QIcon(m_airBag ? ":/img/build/airbagOn.png"
+                                       : ":/img/build/airbagOff.png"));
+    if (!can) return;
+    can->setAirBag(m_airBag);
+    sendIdent(0x168);
 }
+
+
 void MainWindow::on_stop_clicked()
 {
-    // on inverse l'état
     m_stop = !m_stop;
-
-    // on met la bonne icône
-    if (m_stop) {
-        ui->stop->setIcon(QIcon(":/img/build/stopOn.png"));
-    } else {
-        ui->stop->setIcon(QIcon(":/img/build/stopOff.png"));
-    }
-
-    // on informe la couche CAN
-    if (can) {
-        can->setStop(m_stop);
-    }
+    ui->stop->setIcon(QIcon(m_stop ? ":/img/build/stopOn.png"
+                                   : ":/img/build/stopOff.png"));
+    if (!can) return;
+    can->setStop(m_stop);
+    sendIdent(0x128);
 }
 
 void MainWindow::on_radioLocal_toggled(bool checked)
@@ -683,3 +585,77 @@ void MainWindow::on_radioTCP_toggled(bool checked)
     m_modeConnexion = ModeConnexion::TCP;
     qDebug() << "[MODE] Passage en mode TCP (distant)";
 }
+
+void MainWindow::on_radioUDP_toggled(bool checked)
+{
+    if (!checked) return;
+
+    if (!udpClient) {
+        QMessageBox::warning(this, "UDP", "Client UDP non initialisé");
+        ui->radioLocal->setChecked(true);
+        return;
+    }
+
+    m_modeConnexion = ModeConnexion::UDP;
+    qDebug() << "[MODE] Passage en mode UDP ";
+}
+
+bool MainWindow::sendIdentTCP(unsigned long ident)
+{
+    if (!tcpClient || !can) return false;
+
+    if (!tcpClient->connecter()) {
+        qDebug() << "[TCP] Connexion impossible";
+        return false;
+    }
+
+    can_frame frame{};
+    if (!can->buildFrame(ident, frame)) {
+        qDebug() << "[TCP] ID non géré:" << Qt::hex << ident;
+        return false;
+    }
+
+    long sent = tcpClient->writeData(&frame, (long)sizeof(can_frame));
+    if (sent != (long)sizeof(can_frame)) {
+        qDebug() << "[TCP] Envoi incomplet:" << sent;
+        return false;
+    }
+
+    return true;
+}
+
+bool MainWindow::sendIdentUDP(unsigned long ident)
+{
+    if (!udpClient || !can) return false;
+
+    can_frame frame{};
+    if (!can->buildFrame(ident, frame)) {
+        qDebug() << "[UDP] ID non géré:" << Qt::hex << ident;
+        return false;
+    }
+
+    long sent = udpClient->write_datagram(&frame, (long)sizeof(can_frame), "172.16.230.208");
+    if (sent != (long)sizeof(can_frame)) {
+        qDebug() << "[UDP] Envoi incomplet:" << sent;
+        return false;
+    }
+
+    return true;
+}
+
+void MainWindow::sendIdent(unsigned long ident)
+{
+    if (!can) return;
+
+    if (m_modeConnexion == ModeConnexion::TCP) {
+        sendIdentTCP(ident);
+    }
+    else if (m_modeConnexion == ModeConnexion::UDP) {
+        sendIdentUDP(ident);
+    }
+    else {
+        if (!mux || !mux->carteOuverte) return;
+        can->envoieMsgPeriodique(ident);
+    }
+}
+

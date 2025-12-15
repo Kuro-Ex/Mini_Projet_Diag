@@ -44,9 +44,7 @@ bool TCPSocketClient::connecter()
         return false;
     }
 
-    int res = connect(socketClient,
-                      (SOCKADDR*)&addrSockServer,
-                      sizeof(addrSockServer));
+    int res = connect(socketClient,(SOCKADDR*)&addrSockServer,sizeof(addrSockServer));
 
     if (res == SOCKET_ERROR) {
         closesocket(socketClient);

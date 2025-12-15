@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "datagramsocketclient.h"
 #include "mux.h"
 #include "can.h"
 #include "tcpsocketclient.h"
@@ -67,6 +68,7 @@ private slots:
     void on_radioLocal_toggled(bool checked);
     void on_radioTCP_toggled(bool checked);
 
+    void on_radioUDP_toggled(bool checked);
 
 private:
     Ui::MainWindow *ui;
@@ -100,11 +102,15 @@ private:
     bool m_tcpActif = false;
     bool m_remoteMode = false;
 
-    enum class ModeConnexion { Local, TCP };
+    enum class ModeConnexion { Local, TCP, UDP};
     ModeConnexion m_modeConnexion = ModeConnexion::Local;
 
     TCPSocketClient *tcpClient;
+    DatagramSocketClient* udpClient;
 
-    void envoyerTrameTCP(unsigned long ident);
+    bool sendIdentUDP(unsigned long ident);
+    bool sendIdentTCP(unsigned long ident);
+    void sendIdent(unsigned long ident);
+
 };
 #endif // MAINWINDOW_H
