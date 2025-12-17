@@ -7,14 +7,16 @@
     <x>0</x>
     <y>0</y>
     <width>1127</width>
-    <height>641</height>
+    <height>647</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QMainWindow {
+   <string notr="true">
+
+QMainWindow {
     background-color: #3A232D;
 }
 
@@ -56,6 +58,55 @@ QToolButton:disabled,
 QLabel:disabled {
     color: rgba(255, 255, 255, 120);
 }
+
+QSlider::groove:horizontal {
+    height: 10px;
+    background: #DCE6F2;          /* partie vide */
+    border-radius: 5px;
+}
+
+QSlider::sub-page:horizontal {
+    background: #E8B04A;          /* couleur baguette 🍞 */
+    border-radius: 5px;
+}
+
+QSlider::add-page:horizontal {
+    background: #DCE6F2;
+    border-radius: 5px;
+}
+
+QSlider::handle:horizontal {
+    background: #2B567E;          /* poignée */
+    width: 16px;
+    height: 16px;
+    margin: -4px 0;               /* centre la poignée */
+    border-radius: 8px;
+}
+
+QSlider::sub-page:horizontal {
+    background: #3D7CC9;   /* bleu TETO */
+}
+
+QSlider::groove:horizontal {
+    height: 12px;
+    border-radius: 6px;
+    background: qlineargradient(
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0 #DCE6F2,
+        stop:1 #BFCAD6
+    );
+}
+
+QSlider::sub-page:horizontal {
+    background: qlineargradient(
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0 #F4C76A,
+        stop:1 #E8B04A
+    );
+    border-radius: 6px;
+}
+
+
 </string>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -63,17 +114,17 @@ QLabel:disabled {
     <property name="geometry">
      <rect>
       <x>160</x>
-      <y>50</y>
-      <width>351</width>
-      <height>141</height>
+      <y>40</y>
+      <width>361</width>
+      <height>151</height>
      </rect>
     </property>
     <property name="styleSheet">
      <string notr="true">border-color: rgb(0, 0, 0);
-</string>
+font: 12pt &quot;Bernard MT Condensed&quot;;</string>
     </property>
     <property name="title">
-     <string>Cartes 6CL</string>
+     <string>Cartes 6C6L :</string>
     </property>
     <widget class="QComboBox" name="comboBoxCartes">
      <property name="geometry">
@@ -98,7 +149,7 @@ QLabel:disabled {
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true">font: 700 12pt &quot;Segoe UI&quot;;</string>
+      <string notr="true">font: 12pt &quot;Bernard MT Condensed&quot;;</string>
      </property>
      <property name="text">
       <string>Carte connectée : 
@@ -116,7 +167,7 @@ N° de série : </string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 700 12pt &quot;Segoe UI&quot;;</string>
+     <string notr="true">font: 14pt &quot;Bernard MT Condensed&quot;;</string>
     </property>
     <property name="text">
      <string>Nombre de cartes libres :  </string>
@@ -235,10 +286,10 @@ N° de série : </string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 700 10pt &quot;Segoe UI&quot;;</string>
+     <string notr="true">font: 12pt &quot;Bernard MT Condensed&quot;;</string>
     </property>
     <property name="text">
-     <string> Régime :</string>
+     <string> Régime : 0 %</string>
     </property>
    </widget>
    <widget class="QLabel" name="labelEssence">
@@ -251,10 +302,10 @@ N° de série : </string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 700 10pt &quot;Segoe UI&quot;;</string>
+     <string notr="true">font: 12pt &quot;Bernard MT Condensed&quot;;</string>
     </property>
     <property name="text">
-     <string>Essence :</string>
+     <string>Essence : 0 %</string>
     </property>
    </widget>
    <widget class="QLabel" name="labelVitesse">
@@ -267,10 +318,10 @@ N° de série : </string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 700 10pt &quot;Segoe UI&quot;;</string>
+     <string notr="true">font: 12pt &quot;Bernard MT Condensed&quot;;</string>
     </property>
     <property name="text">
-     <string> Vitesse :</string>
+     <string> Vitesse : 0 km/h</string>
     </property>
    </widget>
    <widget class="QLabel" name="labelRapportBVA">
@@ -283,10 +334,10 @@ N° de série : </string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 700 10pt &quot;Segoe UI&quot;;</string>
+     <string notr="true">font: 12pt &quot;Bernard MT Condensed&quot;;</string>
     </property>
     <property name="text">
-     <string>Rapport BVA :</string>
+     <string>Rapport BVA : P</string>
     </property>
    </widget>
    <widget class="QLabel" name="labelTempEau">
@@ -299,10 +350,10 @@ N° de série : </string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 700 10pt &quot;Segoe UI&quot;;</string>
+     <string notr="true">font: 12pt &quot;Bernard MT Condensed&quot;;</string>
     </property>
     <property name="text">
-     <string>TempEau :</string>
+     <string>TempEau : 0 °C</string>
     </property>
    </widget>
    <widget class="QLabel" name="labelModeBVA">
@@ -315,10 +366,10 @@ N° de série : </string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 700 10pt &quot;Segoe UI&quot;;</string>
+     <string notr="true">font: 12pt &quot;Bernard MT Condensed&quot;;</string>
     </property>
     <property name="text">
-     <string>Mode BVA :</string>
+     <string>Mode BVA : Auto</string>
     </property>
    </widget>
    <widget class="QSlider" name="sliderLuminosite">
@@ -329,6 +380,9 @@ N° de série : </string>
       <width>131</width>
       <height>16</height>
      </rect>
+    </property>
+    <property name="maximum">
+     <number>100</number>
     </property>
     <property name="orientation">
      <enum>Qt::Horizontal</enum>
@@ -344,10 +398,10 @@ N° de série : </string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 700 10pt &quot;Segoe UI&quot;;</string>
+     <string notr="true">font: 12pt &quot;Bernard MT Condensed&quot;;</string>
     </property>
     <property name="text">
-     <string>Luminosité :</string>
+     <string>Luminosité : 0 %</string>
     </property>
    </widget>
    <widget class="QGroupBox" name="groupBox_3">
@@ -359,8 +413,11 @@ N° de série : </string>
       <height>281</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">font: 12pt &quot;Bernard MT Condensed&quot;;</string>
+    </property>
     <property name="title">
-     <string>Voyants du tableau de bord</string>
+     <string>Voyants du tableau de bord :</string>
     </property>
     <widget class="QPushButton" name="feuxBrouillardAr">
      <property name="geometry">
@@ -812,10 +869,13 @@ N° de série : </string>
     <property name="geometry">
      <rect>
       <x>600</x>
-      <y>50</y>
-      <width>351</width>
-      <height>141</height>
+      <y>40</y>
+      <width>361</width>
+      <height>151</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 12pt &quot;Bernard MT Condensed&quot;;</string>
     </property>
     <property name="title">
      <string>Mode de connexion :</string>
@@ -825,8 +885,8 @@ N° de série : </string>
       <rect>
        <x>30</x>
        <y>30</y>
-       <width>301</width>
-       <height>31</height>
+       <width>311</width>
+       <height>41</height>
       </rect>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_10">
@@ -857,9 +917,9 @@ N° de série : </string>
      <property name="geometry">
       <rect>
        <x>30</x>
-       <y>60</y>
-       <width>301</width>
-       <height>72</height>
+       <y>70</y>
+       <width>311</width>
+       <height>71</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -887,7 +947,7 @@ N° de série : </string>
    <widget class="QWidget" name="verticalLayoutWidget_2">
     <property name="geometry">
      <rect>
-      <x>730</x>
+      <x>720</x>
       <y>490</y>
       <width>281</width>
       <height>80</height>
@@ -896,15 +956,21 @@ N° de série : </string>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="QPushButton" name="btnVoyantsOn">
+       <property name="styleSheet">
+        <string notr="true">font: 12pt &quot;Bernard MT Condensed&quot;;</string>
+       </property>
        <property name="text">
-        <string>VoyantOn</string>
+        <string>Voyant On</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="btnVoyantsOff">
+       <property name="styleSheet">
+        <string notr="true">font: 12pt &quot;Bernard MT Condensed&quot;;</string>
+       </property>
        <property name="text">
-        <string>VoyantOff</string>
+        <string>Voyant Off</string>
        </property>
       </widget>
      </item>

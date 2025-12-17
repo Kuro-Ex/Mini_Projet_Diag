@@ -19,9 +19,9 @@ MainWindow::MainWindow(QWidget *parent)
 {
     // --- UI générale ---
     ui->setupUi(this);
-    this->setFixedSize(1127, 641);
+    this->setFixedSize(1127, 647);
     this->setWindowTitle(QString::fromUtf8("T.E.T.O – Testeur Électronique de Tableau de bord Opérationnel"));
-    this->statusBar()->showMessage("Développé par RAKOTOARIMANANA Enrique");
+    this->statusBar()->showMessage("Développé par RAKOTOARIMANANA Rakotondrainibe Enrique Tantely - v1.0");
     this->setWindowIcon(QIcon(":/img/build/tetoIcon.png"));
 
     // --- Initialisation des composants ---
@@ -47,7 +47,7 @@ MainWindow::MainWindow(QWidget *parent)
     if (ui->radioLocal)
         ui->radioLocal->setChecked(true);
 
-    // --- Chargement dynamique de la bibliothèque MuxDLL ---
+    // --- Chargement de la bibliothèque MuxDLL ---
     QLibrary *lib = new QLibrary("MuxDLL");
     if (!lib->load()) {
         QMessageBox::critical(this, "Erreur", "Impossible de charger MuxDLL !");
@@ -279,7 +279,6 @@ void MainWindow::on_btnVoyantsOn_clicked()
     etatVoyants();
 
     // CAN
-    can->setVoyantsAll(true);
     can->setClignoGauche(true);
     can->setClignoDroite(true);
     can->setfeuxBrouilAR(true);
@@ -327,7 +326,6 @@ void MainWindow::on_btnVoyantsOff_clicked()
 
     etatVoyants();
 
-    can->setVoyantsAll(false);
     can->setClignoGauche(false);
     can->setClignoDroite(false);
     can->setfeuxBrouilAR(false);
@@ -390,7 +388,7 @@ void MainWindow::on_sliderTempEau_valueChanged(int value)
 void MainWindow::on_sliderRapportBVA_valueChanged(int value)
 {
     if (!can) return;
-    can->setRapportBVAIndex(value); // 0..9
+    can->setRapportBVAIndex(value);
 
     QString rapportTxt;
 
@@ -408,14 +406,14 @@ void MainWindow::on_sliderRapportBVA_valueChanged(int value)
     default: rapportTxt = "?";     break;
     }
 
-    ui->labelRapportBVA->setText("Rapport : " + rapportTxt);
+    ui->labelRapportBVA->setText("Rapport BVA : " + rapportTxt);
     sendIdent(0x128);
 }
 
 void MainWindow::on_sliderModeBVA_valueChanged(int value)
 {
     if (!can) return;
-    can->setModeConduiteIndex(value); // 0..4
+    can->setModeConduiteIndex(value);
 
     QString modeTxt;
 
@@ -428,7 +426,7 @@ void MainWindow::on_sliderModeBVA_valueChanged(int value)
     default: modeTxt = "?";                  break;
     }
 
-    ui->labelModeBVA->setText("Mode : " + modeTxt);
+    ui->labelModeBVA->setText("Mode BVA : " + modeTxt);
     sendIdent(0x128);
 }
 
@@ -520,7 +518,7 @@ void MainWindow::on_feuxPositionnement_clicked()
 {
     m_Pos = !m_Pos;
     ui->feuxPositionnement->setIcon(QIcon(m_Pos ? ":/img/build/feuxPosOn.png"
-                                    : ":/img/build/feuxPosOff.png"));
+                                                : ":/img/build/feuxPosOff.png"));
     if (!can) return;
     can->setfeuxPos(m_Pos);
     sendIdent(0x128);
@@ -640,6 +638,11 @@ void MainWindow::on_stop_clicked()
 void MainWindow::on_radioLocal_toggled(bool checked)
 {
     if (!checked) return;
+    // activation des bouttons refresh, connection et de la combocartes
+    ui->connection->setEnabled(true);
+    ui->refresh->setEnabled(true);
+    ui->comboBoxCartes->setEnabled(true);
+
     m_modeConnexion = ModeConnexion::Local;
     setTableauEnabled(isLocalReady());
     qDebug() << "[MODE] Passage en mode LOCAL (bus CAN)";
@@ -679,6 +682,11 @@ void MainWindow::on_radioTCP_toggled(bool checked)
 void MainWindow::on_radioUDP_toggled(bool checked)
 {
     if (!checked) return;
+
+    // desactivation des bouttons refresh, connection et de la combocartes
+    ui->connection->setEnabled(false);
+    ui->refresh->setEnabled(false);
+    ui->comboBoxCartes->setEnabled(false);
 
     if (!udpClient) {
         QMessageBox::warning(this, "UDP", "Client UDP non initialisé");
