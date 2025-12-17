@@ -19,10 +19,18 @@ MainWindow::MainWindow(QWidget *parent)
 {
     // --- UI générale ---
     ui->setupUi(this);
-    this->setFixedSize(1127, 647);
+    this->setFixedSize(1197, 647);
     this->setWindowTitle(QString::fromUtf8("T.E.T.O – Testeur Électronique de Tableau de bord Opérationnel"));
     this->statusBar()->showMessage("Développé par RAKOTOARIMANANA Rakotondrainibe Enrique Tantely - v1.0");
     this->setWindowIcon(QIcon(":/img/build/tetoIcon.png"));
+    ui->ipServer->setText("172.16.230.208");
+    ui->portServer->setText("1500");
+
+    m_remoteMode = false;
+    m_currentIp = ui->ipServer->text().trimmed();
+    m_currentPort = ui->portServer->text().trimmed().toInt();
+
+    applyRemoteTarget();
 
     // --- Initialisation des composants ---
     mux         = new Mux();
@@ -33,15 +41,14 @@ MainWindow::MainWindow(QWidget *parent)
     timermsg    = new QTimer(this);
     timerTrames = new QTimer(this);
 
-    m_remoteMode = false;
-
     // --- Vue CAN ---
     ui->listView->setModel(modelCan);
 
     // --- Timers ---
     connect(timermsg,   &QTimer::timeout, this, &MainWindow::recevoir);
     connect(timerTrames, &QTimer::timeout, this, &MainWindow::envoyerTrameSuivante);
-
+    connect(ui->ipServer,   &QLineEdit::editingFinished, this, &MainWindow::applyRemoteTarget);
+    connect(ui->portServer, &QLineEdit::editingFinished, this, &MainWindow::applyRemoteTarget);
     // --- Mode par défaut : local ---
     m_modeConnexion = ModeConnexion::Local;
     if (ui->radioLocal)
@@ -661,15 +668,32 @@ void MainWindow::on_radioTCP_toggled(bool checked)
     if (!tcpClient) {
         QMessageBox::warning(this, "TCP", "Client TCP non initialisé");
         ui->radioLocal->setChecked(true);
-        return;
         setTableauEnabled(isLocalReady());
+        return;
+
     }
+
+    // --- lire IP/PORT depuis l'IHM ---
+    QString ip = ui->ipServer->text().trimmed();
+    int port   = ui->portServer->text().trimmed().toInt();
+
+    if (ip.isEmpty() || port <= 0 || port > 65535) {
+        QMessageBox::warning(this, "TCP", "IP ou port invalide.");
+        ui->radioLocal->setChecked(true);
+        setTableauEnabled(isLocalReady());
+        return;
+    }
+
+    // --- applique IP/PORT au client TCP ---
+    tcpClient->setServer(ip.toUtf8().constData(), port);
+
+    applyRemoteTarget();
 
     if (!tcpClient->connecter()) {
         QMessageBox::warning(this, "TCP", "Impossible de se connecter au tableau de bord distant.");
         ui->radioLocal->setChecked(true);
-        return;
         setTableauEnabled(isLocalReady());
+        return;
     }
 
     m_modeConnexion = ModeConnexion::TCP;
@@ -688,13 +712,32 @@ void MainWindow::on_radioUDP_toggled(bool checked)
     ui->refresh->setEnabled(false);
     ui->comboBoxCartes->setEnabled(false);
 
+    // --- lire IP/PORT depuis l'IHM ---
+    QString ip = ui->ipServer->text().trimmed();
+    int port   = ui->portServer->text().trimmed().toInt();
+
+    if (ip.isEmpty() || port <= 0 || port > 65535) {
+        QMessageBox::warning(this, "UDP", "IP ou port invalide.");
+        ui->radioLocal->setChecked(true);
+        setTableauEnabled(isLocalReady());
+        return;
+    }
+
+    // --- recréer le client UDP avec le port choisi ---
+    if (udpClient) {
+        delete udpClient;
+        udpClient = nullptr;
+    }
+    udpClient = new DatagramSocketClient((unsigned short)port);
+
     if (!udpClient) {
         QMessageBox::warning(this, "UDP", "Client UDP non initialisé");
         ui->radioLocal->setChecked(true);
-        return;
         setTableauEnabled(isLocalReady());
+        return;
     }
 
+    applyRemoteTarget();
     m_modeConnexion = ModeConnexion::UDP;
     setTableauEnabled(true);
     startTrameLoop(50);
@@ -741,12 +784,16 @@ bool MainWindow::sendIdentUDP(unsigned long ident)
         return false;
     }
 
-    long sent = udpClient->writeDatagram(&frame, (long)sizeof(can_frame), "172.16.230.208");
+    // Assure que la cible est à jour
+    applyRemoteTarget();
+
+    QByteArray ipBytes = m_currentIp.toUtf8();
+    long sent = udpClient->writeDatagram(&frame, (long)sizeof(can_frame), ipBytes.constData());
+
     if (sent != (long)sizeof(can_frame)) {
         qDebug() << "[UDP] Envoi incomplet:" << sent;
         return false;
     }
-
     return true;
 }
 
@@ -803,6 +850,33 @@ void MainWindow::stopTrameLoop()
 {
     if (!timerTrames) return;
     timerTrames->stop();
+}
+
+void MainWindow::applyRemoteTarget()
+{
+    QString ip = ui->ipServer->text().trimmed();
+    int port   = ui->portServer->text().trimmed().toInt();
+
+    if (ip.isEmpty() || port <= 0 || port > 65535) return;
+
+    // si rien n'a changé, on ne fait rien
+    if (ip == m_currentIp && port == m_currentPort) return;
+
+    m_currentIp = ip;
+    m_currentPort = port;
+
+    qDebug() << "[REMOTE] Nouvelle cible:" << m_currentIp << ":" << m_currentPort;
+
+    // --- TCP : forcer la reconnexion sur la nouvelle cible ---
+    if (tcpClient) {
+        tcpClient->deconnecter();
+        tcpClient->setServer(m_currentIp.toUtf8().constData(), m_currentPort);
+        tcpClient->connecter();   // tente direct si mode TCP
+    }
+
+    // --- UDP : recréer client sur nouveau port (port destination dans ton design) ---
+    if (udpClient) { delete udpClient; udpClient = nullptr; }
+    udpClient = new DatagramSocketClient((unsigned short)m_currentPort);
 }
 
 

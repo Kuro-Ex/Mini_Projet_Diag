@@ -19,7 +19,9 @@ public:
     long readData(void *data, long size);
     long writeData(void *data, long size);
 
-    bool isConnected() const { return connected; }   // optionnel, pratique
+    bool isConnected() const { return connected; }
+    void setServer(const char* ip, int port);
+    void deconnecter();
 };
 
 #endif

@@ -36,25 +36,26 @@ DatagramSocketClient::~DatagramSocketClient()
 // --- ecriture des msg en UDP ---
 long DatagramSocketClient::writeDatagram(const void* data, long size, const char* host)
 {
-    struct hostent* hostentp;
-
-    hostentp = gethostbyname(host);
+    struct hostent* hostentp = gethostbyname(host);
     if (!hostentp) {
         perror("gethostbyname");
         return -1;
     }
 
-    memcpy(&source.sin_addr,hostentp->h_addr,hostentp->h_length);
+    source.sin_family = AF_INET;
+    source.sin_port   = htons((u_short)port);   // port dynamique
+    memcpy(&source.sin_addr, hostentp->h_addr, hostentp->h_length);
 
-    long val = (long)sendto((SOCKET)sock,(const char*)data,(int)size,0,(struct sockaddr*)&source,(int)sizeof(source));
+    long val = (long)sendto((SOCKET)sock, (const char*)data, (int)size, 0,
+                             (struct sockaddr*)&source, (int)sizeof(source));
 
     if (val < 0) {
         perror("erreur sendto");
         return -1;
     }
-
     return val;
 }
+
 
 // --- lecture pour des msg ---
 long DatagramSocketClient::readDatagram(void* data, long size)

@@ -6,6 +6,8 @@
 #include "can.h"
 #include "tcpsocketclient.h"
 
+#include <QThread>
+#include <QDateTime>
 #include <QTimer>
 #include <QMainWindow>
 #include <QDebug>
@@ -76,7 +78,9 @@ private:
     QStandardItemModel *modelCan;
     QTimer *timermsg;
     QTimer *timerTrames = nullptr;   // boucle infinie d’envoi
+    QString m_currentIp;
     int m_trameIndex = 0;            // index dans tramesPSA
+    int m_currentPort = 0;
 
     void startTrameLoop(int periodMs = 50);
     void stopTrameLoop();
@@ -123,6 +127,8 @@ private:
     void etatVoyants();
     void setTableauEnabled(bool enabled);
     bool isLocalReady() const;
+    void applyRemoteTarget();
+
 
 };
 #endif // MAINWINDOW_H

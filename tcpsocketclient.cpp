@@ -9,13 +9,11 @@ TCPSocketClient::TCPSocketClient()
     socketClient = INVALID_SOCKET;
     connected = false;
 
-    hostName   = (char*)"172.16.230.208";
-    portNumber = 1500;
+    hostName   = nullptr;
+    portNumber = 0;
 
     memset(&addrSockServer, 0, sizeof(addrSockServer));
     addrSockServer.sin_family      = AF_INET;
-    addrSockServer.sin_port        = htons(portNumber);
-    addrSockServer.sin_addr.s_addr = inet_addr(hostName);
 }
 
 TCPSocketClient::~TCPSocketClient()
@@ -24,6 +22,15 @@ TCPSocketClient::~TCPSocketClient()
         closesocket(socketClient);
     }
     WSACleanup();
+}
+
+void TCPSocketClient::setServer(const char* ip, int port)
+{
+    hostName   = (char*)ip;
+    portNumber = port;
+
+    addrSockServer.sin_port = htons(portNumber);
+    addrSockServer.sin_addr.s_addr = inet_addr(hostName);
 }
 
 bool TCPSocketClient::connecter()
@@ -55,6 +62,15 @@ bool TCPSocketClient::connecter()
 
     connected = true;
     return true;
+}
+
+void TCPSocketClient::deconnecter()
+{
+    connected = false;
+    if (socketClient != INVALID_SOCKET) {
+        closesocket(socketClient);
+        socketClient = INVALID_SOCKET;
+    }
 }
 
 long TCPSocketClient::readData(void *data, long size)
