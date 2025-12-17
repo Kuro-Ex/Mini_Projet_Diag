@@ -30,8 +30,6 @@ MainWindow::MainWindow(QWidget *parent)
     m_currentIp = ui->ipServer->text().trimmed();
     m_currentPort = ui->portServer->text().trimmed().toInt();
 
-    applyRemoteTarget();
-
     // --- Initialisation des composants ---
     mux         = new Mux();
     can         = new CAN(mux);
@@ -40,6 +38,8 @@ MainWindow::MainWindow(QWidget *parent)
     modelCan    = new QStandardItemModel(this);
     timermsg    = new QTimer(this);
     timerTrames = new QTimer(this);
+
+    applyRemoteTarget();
 
     // --- Vue CAN ---
     ui->listView->setModel(modelCan);
@@ -788,7 +788,7 @@ bool MainWindow::sendIdentUDP(unsigned long ident)
     applyRemoteTarget();
 
     QByteArray ipBytes = m_currentIp.toUtf8();
-    long sent = udpClient->writeDatagram(&frame, (long)sizeof(can_frame), ipBytes.constData());
+    long sent = udpClient->writeDatagram(&frame, sizeof(can_frame),m_currentIp.toUtf8().constData(),(unsigned short)m_currentPort);
 
     if (sent != (long)sizeof(can_frame)) {
         qDebug() << "[UDP] Envoi incomplet:" << sent;
@@ -873,13 +873,7 @@ void MainWindow::applyRemoteTarget()
         tcpClient->setServer(m_currentIp.toUtf8().constData(), m_currentPort);
         tcpClient->connecter();   // tente direct si mode TCP
     }
-
-    // --- UDP : recréer client sur nouveau port (port destination dans ton design) ---
-    if (udpClient) { delete udpClient; udpClient = nullptr; }
-    udpClient = new DatagramSocketClient((unsigned short)m_currentPort);
 }
-
-
 /* =======================================================
  * UTILITAIRES UI
  * ======================================================= */

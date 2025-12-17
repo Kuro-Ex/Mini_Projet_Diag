@@ -10,7 +10,7 @@ public:
     explicit DatagramSocketClient(unsigned short port);
     ~DatagramSocketClient();
 
-    long writeDatagram(const void* data, long size, const char* host);
+    long writeDatagram(const void* data, long size, const char* host, unsigned short port);
     long readDatagram(void* data, long size);
 
 private:

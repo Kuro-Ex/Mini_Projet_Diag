@@ -34,7 +34,7 @@ DatagramSocketClient::~DatagramSocketClient()
 }
 
 // --- ecriture des msg en UDP ---
-long DatagramSocketClient::writeDatagram(const void* data, long size, const char* host)
+long DatagramSocketClient::writeDatagram(const void* data, long size, const char* host, unsigned short port)
 {
     struct hostent* hostentp = gethostbyname(host);
     if (!hostentp) {
