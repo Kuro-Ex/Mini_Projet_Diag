@@ -7,14 +7,15 @@
 class DatagramSocketClient
 {
 public:
-    explicit DatagramSocketClient(int port);
+    explicit DatagramSocketClient(unsigned short port);
     ~DatagramSocketClient();
 
-    long write_datagram(const void* data, long len, const char* host);
+    long writeDatagram(const void* data, long size, const char* host);
+    long readDatagram(void* data, long size);
 
 private:
     int sock;
-    int port;
+    unsigned short port;
     sockaddr_in source;
 };
 

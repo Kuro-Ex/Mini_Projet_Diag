@@ -5,8 +5,8 @@
 #include "mux.h"
 #include "can.h"
 #include "tcpsocketclient.h"
-#include "canframe.h"
 
+#include <QTimer>
 #include <QMainWindow>
 #include <QDebug>
 #include<QMessageBox>
@@ -32,11 +32,10 @@ public:
 private slots:
     void initialiserComboCartes();
     void recevoir();
+    void envoyerTrameSuivante();
+
     void on_connection_clicked();
     void on_refresh_clicked();
-    void on_EnvoyerTrames_clicked();
-    void envoyerTrameSuivante();
-    void on_StopTrames_clicked();
 
     void on_btnVoyantsOn_clicked();
     void on_btnVoyantsOff_clicked();
@@ -55,6 +54,7 @@ private slots:
     void on_feuxBrouillardAv_clicked();
     void on_feuxCroisement_clicked();
     void on_feuxDeRoute_clicked();
+    void on_feuxPositionnement_clicked();
     void on_Frpk_clicked();
     void on_service_clicked();
     void on_abs_clicked();
@@ -67,7 +67,6 @@ private slots:
 
     void on_radioLocal_toggled(bool checked);
     void on_radioTCP_toggled(bool checked);
-
     void on_radioUDP_toggled(bool checked);
 
 private:
@@ -76,20 +75,28 @@ private:
     CAN *can;
     QStandardItemModel *modelCan;
     QTimer *timermsg;
+    QTimer *timerTrames = nullptr;   // boucle infinie d’envoi
+    int m_trameIndex = 0;            // index dans tramesPSA
 
-    QTimer *timerTrames;
-    int indexTrame = 0;
+    void startTrameLoop(int periodMs = 50);
+    void stopTrameLoop();
 
     QVector<unsigned long> tramesPSA = {
         0x0F6, 0x036, 0x168, 0x128, 0x0B6, 0x161
     };
-
+    bool m_periodic0B6 = false;
+    bool m_periodic161 = false;
+    bool m_periodic0F6 = false;
+    bool m_periodic036 = false;
+    bool m_periodic168 = false;
+    bool m_periodic128 = false;
     bool m_clignoGaucheOn = false;
     bool m_clignoDroiteOn = false;
     bool m_brouilAr = false;
     bool m_brouilAv = false;
     bool m_Crois = false;
     bool m_Route = false;
+    bool m_Pos = false;
     bool m_service = false;
     bool m_frpk = false;
     bool m_abs = false;
@@ -111,6 +118,11 @@ private:
     bool sendIdentUDP(unsigned long ident);
     bool sendIdentTCP(unsigned long ident);
     void sendIdent(unsigned long ident);
+
+    void resetVoyants();
+    void etatVoyants();
+    void setTableauEnabled(bool enabled);
+    bool isLocalReady() const;
 
 };
 #endif // MAINWINDOW_H

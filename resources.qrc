@@ -32,5 +32,7 @@
         <file>build/airbagArrOff.png</file>
         <file>build/airbagArrOn.png</file>
         <file>build/tetoIcon.png</file>
+        <file>build/feuxPosOff.png</file>
+        <file>build/feuxPosOn.png</file>
     </qresource>
 </RCC>

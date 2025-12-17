@@ -2,7 +2,7 @@
 #include <cstdio>
 #include <cstring>
 
-DatagramSocketClient::DatagramSocketClient(int port)
+DatagramSocketClient::DatagramSocketClient(unsigned short port)
 {
     this->port = port;
 
@@ -33,24 +33,44 @@ DatagramSocketClient::~DatagramSocketClient()
     WSACleanup();
 }
 
-long DatagramSocketClient::write_datagram(const void* data, long len, const char* host)
+// --- ecriture des msg en UDP ---
+long DatagramSocketClient::writeDatagram(const void* data, long size, const char* host)
 {
     struct hostent* hostentp;
 
     hostentp = gethostbyname(host);
     if (!hostentp) {
-        std::perror("gethostbyname");
+        perror("gethostbyname");
         return -1;
     }
 
-    std::memcpy(&source.sin_addr,hostentp->h_addr,hostentp->h_length);
+    memcpy(&source.sin_addr,hostentp->h_addr,hostentp->h_length);
 
-    long val = (long)sendto((SOCKET)sock,(const char*)data,(int)len,0,(struct sockaddr*)&source,(int)sizeof(source));
+    long val = (long)sendto((SOCKET)sock,(const char*)data,(int)size,0,(struct sockaddr*)&source,(int)sizeof(source));
 
     if (val < 0) {
-        std::perror("erreur sendto");
+        perror("erreur sendto");
         return -1;
     }
 
     return val;
+}
+
+// --- lecture pour des msg ---
+long DatagramSocketClient::readDatagram(void* data, long size)
+{
+    if (sock == (int)INVALID_SOCKET)
+        return -1;
+
+    sockaddr_in source{};
+    int sourcelen = sizeof(source);
+
+    long received = (long)recvfrom((SOCKET)sock,(char*)data,(int)size,0,(struct sockaddr*)&source,&sourcelen);
+
+    if (received < 0) {
+        std::perror("recvfrom");
+        return -1;
+    }
+
+    return received;
 }
