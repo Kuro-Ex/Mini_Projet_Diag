@@ -121,7 +121,7 @@ QSlider::sub-page:horizontal {
     </property>
     <property name="styleSheet">
      <string notr="true">border-color: rgb(0, 0, 0);
-font: 12pt &quot;Bernard MT Condensed&quot;;</string>
+font: 12pt &quot;Sitka Banner Semibold&quot;;</string>
     </property>
     <property name="title">
      <string>Cartes 6C6L :</string>
@@ -149,7 +149,7 @@ font: 12pt &quot;Bernard MT Condensed&quot;;</string>
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true">font: 12pt &quot;Bernard MT Condensed&quot;;</string>
+      <string notr="true">font: 12pt &quot;Sitka Banner Semibold&quot;;</string>
      </property>
      <property name="text">
       <string>Carte connectée : 
@@ -167,7 +167,7 @@ N° de série : </string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 14pt &quot;Bernard MT Condensed&quot;;</string>
+     <string notr="true">font: 600 14pt &quot;Sitka Banner Semibold&quot;;</string>
     </property>
     <property name="text">
      <string>Nombre de cartes libres :  </string>
@@ -286,7 +286,7 @@ N° de série : </string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 12pt &quot;Bernard MT Condensed&quot;;</string>
+     <string notr="true">font: 12pt &quot;Sitka Banner Semibold&quot;;</string>
     </property>
     <property name="text">
      <string> Régime : 0 %</string>
@@ -302,7 +302,7 @@ N° de série : </string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 12pt &quot;Bernard MT Condensed&quot;;</string>
+     <string notr="true">font: 12pt &quot;Sitka Banner Semibold&quot;;</string>
     </property>
     <property name="text">
      <string>Essence : 0 %</string>
@@ -318,7 +318,7 @@ N° de série : </string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 12pt &quot;Bernard MT Condensed&quot;;</string>
+     <string notr="true">font: 12pt &quot;Sitka Banner Semibold&quot;;</string>
     </property>
     <property name="text">
      <string> Vitesse : 0 km/h</string>
@@ -334,7 +334,7 @@ N° de série : </string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 12pt &quot;Bernard MT Condensed&quot;;</string>
+     <string notr="true">font: 12pt &quot;Sitka Banner Semibold&quot;;</string>
     </property>
     <property name="text">
      <string>Rapport BVA : P</string>
@@ -350,7 +350,7 @@ N° de série : </string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 12pt &quot;Bernard MT Condensed&quot;;</string>
+     <string notr="true">font: 12pt &quot;Sitka Banner Semibold&quot;;</string>
     </property>
     <property name="text">
      <string>TempEau : 0 °C</string>
@@ -366,7 +366,7 @@ N° de série : </string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 12pt &quot;Bernard MT Condensed&quot;;</string>
+     <string notr="true">font: 12pt &quot;Sitka Banner Semibold&quot;;</string>
     </property>
     <property name="text">
      <string>Mode BVA : Auto</string>
@@ -398,7 +398,7 @@ N° de série : </string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 12pt &quot;Bernard MT Condensed&quot;;</string>
+     <string notr="true">font: 12pt &quot;Sitka Banner Semibold&quot;;</string>
     </property>
     <property name="text">
      <string>Luminosité : 0 %</string>
@@ -414,7 +414,7 @@ N° de série : </string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 12pt &quot;Bernard MT Condensed&quot;;</string>
+     <string notr="true">font: 12pt &quot;Sitka Banner Semibold&quot;;</string>
     </property>
     <property name="title">
      <string>Voyants du tableau de bord :</string>
@@ -784,9 +784,9 @@ N° de série : </string>
     <widget class="QPushButton" name="AlerteHuile">
      <property name="geometry">
       <rect>
-       <x>190</x>
+       <x>170</x>
        <y>20</y>
-       <width>111</width>
+       <width>131</width>
        <height>31</height>
       </rect>
      </property>
@@ -875,7 +875,7 @@ N° de série : </string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 12pt &quot;Bernard MT Condensed&quot;;</string>
+     <string notr="true">font: 12pt &quot;Sitka Banner Semibold&quot;;</string>
     </property>
     <property name="title">
      <string>Mode de connexion :</string>
@@ -928,7 +928,7 @@ N° de série : </string>
         <item>
          <widget class="QPushButton" name="connection">
           <property name="text">
-           <string>Connection</string>
+           <string>Connexion</string>
           </property>
          </widget>
         </item>
@@ -957,7 +957,7 @@ N° de série : </string>
      <item>
       <widget class="QPushButton" name="btnVoyantsOn">
        <property name="styleSheet">
-        <string notr="true">font: 12pt &quot;Bernard MT Condensed&quot;;</string>
+        <string notr="true">font: 12pt &quot;Sitka Banner Semibold&quot;;</string>
        </property>
        <property name="text">
         <string>Voyant On</string>
@@ -967,7 +967,7 @@ N° de série : </string>
      <item>
       <widget class="QPushButton" name="btnVoyantsOff">
        <property name="styleSheet">
-        <string notr="true">font: 12pt &quot;Bernard MT Condensed&quot;;</string>
+        <string notr="true">font: 12pt &quot;Sitka Banner Semibold&quot;;</string>
        </property>
        <property name="text">
         <string>Voyant Off</string>
