@@ -707,15 +707,12 @@ void MainWindow::on_radioUDP_toggled(bool checked)
 {
     if (!checked) return;
 
-    // desactivation des bouttons refresh, connection et de la combocartes
     ui->connection->setEnabled(false);
     ui->refresh->setEnabled(false);
     ui->comboBoxCartes->setEnabled(false);
 
-    // --- lire IP/PORT depuis l'IHM ---
     QString ip = ui->ipServer->text().trimmed();
     int port   = ui->portServer->text().trimmed().toInt();
-
     if (ip.isEmpty() || port <= 0 || port > 65535) {
         QMessageBox::warning(this, "UDP", "IP ou port invalide.");
         ui->radioLocal->setChecked(true);
@@ -723,25 +720,22 @@ void MainWindow::on_radioUDP_toggled(bool checked)
         return;
     }
 
-    // --- recréer le client UDP avec le port choisi ---
-    if (udpClient) {
-        delete udpClient;
-        udpClient = nullptr;
-    }
-    udpClient = new DatagramSocketClient((unsigned short)port);
+    m_modeConnexion = ModeConnexion::UDP;
 
     if (!udpClient) {
-        QMessageBox::warning(this, "UDP", "Client UDP non initialisé");
+        udpClient = new DatagramSocketClient(/*localPort=*/0);
+    }
+
+    if (!udpClient->setTarget(ip.toUtf8().constData(), (unsigned short)port)) {
+        QMessageBox::warning(this, "UDP", "Impossible de définir la cible UDP.");
         ui->radioLocal->setChecked(true);
         setTableauEnabled(isLocalReady());
         return;
     }
 
-    applyRemoteTarget();
-    m_modeConnexion = ModeConnexion::UDP;
     setTableauEnabled(true);
     startTrameLoop(50);
-    qDebug() << "[MODE] Passage en mode UDP ";
+    qDebug() << "[MODE] Passage en mode UDP";
 }
 
 /* =======================================================
@@ -784,18 +778,15 @@ bool MainWindow::sendIdentUDP(unsigned long ident)
         return false;
     }
 
-    // Assure que la cible est à jour
-    applyRemoteTarget();
-
-    QByteArray ipBytes = m_currentIp.toUtf8();
-    long sent = udpClient->writeDatagram(&frame, sizeof(can_frame),m_currentIp.toUtf8().constData(),(unsigned short)m_currentPort);
-
+    long sent = udpClient->writeDatagram(&frame, (long)sizeof(can_frame));
     if (sent != (long)sizeof(can_frame)) {
         qDebug() << "[UDP] Envoi incomplet:" << sent;
         return false;
     }
     return true;
 }
+
+
 
 // --- envoie des trames en udp ---
 void MainWindow::sendIdent(unsigned long ident)
@@ -873,6 +864,12 @@ void MainWindow::applyRemoteTarget()
         tcpClient->setServer(m_currentIp.toUtf8().constData(), m_currentPort);
         tcpClient->connecter();   // tente direct si mode TCP
     }
+
+    // --- TCP : forcer la reconnexion sur la nouvelle cible ---
+    if (udpClient) {
+        udpClient->setTarget(m_currentIp.toUtf8().constData(),
+                             (unsigned short)m_currentPort);
+    }
 }
 /* =======================================================
  * UTILITAIRES UI
@@ -916,7 +913,6 @@ void MainWindow::setTableauEnabled(bool enabled)
     ui->AirBag->setEnabled(enabled);
     ui->stop->setEnabled(enabled);
 
-    startTrameLoop(50); // 50ms = fluide sans saturer (ajuste si besoin)
 }
 
 void MainWindow::etatVoyants()

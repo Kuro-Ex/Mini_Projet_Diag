@@ -10,13 +10,18 @@ public:
     explicit DatagramSocketClient(unsigned short port);
     ~DatagramSocketClient();
 
-    long writeDatagram(const void* data, long size, const char* host, unsigned short port);
+    bool setTarget(const char* host, unsigned short port);
+    long writeDatagram(const void* data, long size);
     long readDatagram(void* data, long size);
 
 private:
-    int sock;
-    unsigned short port;
-    sockaddr_in source;
+    SOCKET sock = INVALID_SOCKET;
+    sockaddr_in dest{};     // cible (IP/port)
+    bool destReady = false;
+    static long s_wsaRef;
+    unsigned short port = 0;
+    sockaddr_in source{};
 };
+
 
 #endif // DATAGRAMSOCKETCLIENT_H
