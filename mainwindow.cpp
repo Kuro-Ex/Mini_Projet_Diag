@@ -34,10 +34,26 @@ MainWindow::MainWindow(QWidget *parent)
     mux         = new Mux();
     can         = new CAN(mux);
     tcpClient   = new TCPSocketClient();
-    udpClient   = new DatagramSocketClient(1500);
+    if (udpClient) delete udpClient;
+    udpClient   = new DatagramSocketClient(0);
     modelCan    = new QStandardItemModel(this);
     timermsg    = new QTimer(this);
     timerTrames = new QTimer(this);
+
+    // --- Serveurs ---
+    tcpServer = new TCPSocketServer(1500);
+    udpServer = new DatagramSocketServer(1500);
+
+    if (!tcpServer->start()) qDebug() << "[SERVER TCP] start() FAIL";
+    else qDebug() << "[SERVER TCP] listening 1500";
+
+    if (!udpServer->isValid()) qDebug() << "[SERVER UDP] bind FAIL";
+    else qDebug() << "[SERVER UDP] bound 1500";
+
+    // Poll (non bloquant)
+    serverPollTimer = new QTimer(this);
+    connect(serverPollTimer, &QTimer::timeout, this, &MainWindow::pollServers);
+    serverPollTimer->start(10); // 10ms = fluide sans bloquer
 
     applyRemoteTarget();
 
@@ -83,6 +99,9 @@ MainWindow::~MainWindow()
         mux->fermerComCarte();
         delete mux;
     }
+    if (serverPollTimer) serverPollTimer->stop();
+    delete tcpServer;
+    delete udpServer;
     delete ui;
 }
 
@@ -747,11 +766,6 @@ bool MainWindow::sendIdentTCP(unsigned long ident)
 {
     if (!tcpClient || !can) return false;
 
-    if (!tcpClient->connecter()) {
-        qDebug() << "[TCP] Connexion impossible";
-        return false;
-    }
-
     can_frame frame{};
     if (!can->buildFrame(ident, frame)) {
         qDebug() << "[TCP] ID non géré:" << Qt::hex << ident;
@@ -871,6 +885,34 @@ void MainWindow::applyRemoteTarget()
                              (unsigned short)m_currentPort);
     }
 }
+
+void MainWindow::pollServers()
+{
+    // ===== TCP =====
+    if (tcpServer) {
+        tcpServer->acceptClientNonBlocking();
+
+        can_frame frame{};
+        int r = tcpServer->readNonBlocking(&frame, sizeof(can_frame));
+        if (r == sizeof(can_frame)) {
+            qDebug() << "[SERVER TCP] RECU"
+                     << "ID =" << Qt::hex << frame.can_id
+                     << "DLC =" << frame.can_dlc;
+        }
+    }
+
+    // ===== UDP =====
+    if (udpServer) {
+        can_frame frame{};
+        int r = udpServer->read(&frame, sizeof(can_frame));
+        if (r == sizeof(can_frame)) {
+            qDebug() << "[SERVER UDP] RECU"
+                     << "ID =" << Qt::hex << frame.can_id
+                     << "DLC =" << frame.can_dlc;
+        }
+    }
+}
+
 /* =======================================================
  * UTILITAIRES UI
  * ======================================================= */

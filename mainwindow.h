@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "tcpsocketserver.h"
+#include "datagramsocketserver.h"
 #include "datagramsocketclient.h"
 #include "mux.h"
 #include "can.h"
@@ -78,6 +80,8 @@ private:
     QStandardItemModel *modelCan;
     QTimer *timermsg;
     QTimer *timerTrames = nullptr;   // boucle infinie d’envoi
+    QTimer* serverPollTimer = nullptr;
+
     QString m_currentIp;
     int m_trameIndex = 0;            // index dans tramesPSA
     int m_currentPort = 0;
@@ -117,7 +121,11 @@ private:
     ModeConnexion m_modeConnexion = ModeConnexion::Local;
 
     TCPSocketClient *tcpClient;
-    DatagramSocketClient* udpClient;
+    DatagramSocketClient* udpClient = nullptr;
+    TCPSocketServer* tcpServer = nullptr;
+    DatagramSocketServer* udpServer = nullptr;
+
+    void pollServers(); // slot
 
     bool sendIdentUDP(unsigned long ident);
     bool sendIdentTCP(unsigned long ident);

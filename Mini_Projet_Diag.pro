@@ -13,19 +13,23 @@ LIBS   += -lws2_32
 SOURCES += \
     can.cpp \
     datagramsocketclient.cpp \
+    datagramsocketserver.cpp \
     main.cpp \
     mainwindow.cpp \
     mux.cpp \
-    tcpsocketclient.cpp
+    tcpsocketclient.cpp \
+    tcpsocketserver.cpp
 
 HEADERS += \
     can.h \
     canframe.h \
     datagramsocketclient.h \
+    datagramsocketserver.h \
     mainwindow.h \
     mux.h \
     refmux.h \
-    tcpsocketclient.h
+    tcpsocketclient.h \
+    tcpsocketserver.h
 
 FORMS += \
     mainwindow.ui
