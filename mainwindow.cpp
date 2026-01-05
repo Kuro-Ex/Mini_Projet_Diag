@@ -886,18 +886,35 @@ void MainWindow::applyRemoteTarget()
     }
 }
 
+static QString dumpCanFrame(const can_frame& f)
+{
+    QString s;
+    s += QString("ID=0x%1 DLC=%2 DATA=")
+             .arg((unsigned)(f.can_id & 0x1FFFFFFF), 0, 16)  // masque CAN ID (29 bits max)
+             .arg((int)f.can_dlc);
+
+    for (int i = 0; i < (int)f.can_dlc && i < 8; ++i) {
+        s += QString("%1 ").arg((unsigned char)f.data[i], 2, 16, QChar('0')).toUpper();
+    }
+    return s.trimmed();
+}
+
 void MainWindow::pollServers()
 {
+    static int tcpRx = 0;
+    static int udpRx = 0;
+
     // ===== TCP =====
     if (tcpServer) {
         tcpServer->acceptClientNonBlocking();
 
         can_frame frame{};
         int r = tcpServer->readNonBlocking(&frame, sizeof(can_frame));
-        if (r == sizeof(can_frame)) {
-            qDebug() << "[SERVER TCP] RECU"
-                     << "ID =" << Qt::hex << frame.can_id
-                     << "DLC =" << frame.can_dlc;
+        if (r == (int)sizeof(can_frame)) {
+            tcpRx++;
+            QString txt = dumpCanFrame(frame);
+            qDebug().noquote() << "[SERVER TCP] RECU #" << tcpRx << txt;
+
         }
     }
 
@@ -905,13 +922,16 @@ void MainWindow::pollServers()
     if (udpServer) {
         can_frame frame{};
         int r = udpServer->read(&frame, sizeof(can_frame));
-        if (r == sizeof(can_frame)) {
-            qDebug() << "[SERVER UDP] RECU"
-                     << "ID =" << Qt::hex << frame.can_id
-                     << "DLC =" << frame.can_dlc;
+        if (r == (int)sizeof(can_frame)) {
+            udpRx++;
+            QString txt = dumpCanFrame(frame);
+            qDebug().noquote() << "[SERVER UDP] RECU #" << udpRx << txt;
+
+
         }
     }
 }
+
 
 /* =======================================================
  * UTILITAIRES UI
